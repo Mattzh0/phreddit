@@ -1,5 +1,16 @@
+html {
+  height: 100%;
+}
+
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
+  padding: 0px;
+  height: 100%;
+  overflow-y: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -11,3 +22,507 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+a {
+  text-decoration: none;
+  color: black;
+}
+
+.phreddit {
+  height: 100%;
+}
+/* CSS for the banner starts here */
+.banner {
+  width: 100%;
+  height: 60px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: solid;
+  border-width: 1px;
+  border-color: rgb(0, 0, 0)
+}
+
+.application-name {
+  font-family: 'Varela Round', Arial;
+  font-size: 30px;
+  color: rgb(255, 72, 0);
+  font-weight: bold;
+  margin-left: 1%;
+}
+
+.search-box {
+  width: 550px;
+  height: 40px;
+  font-family: 'Roboto', Arial;
+  padding-left: 20px;
+  background-color: rgb(232,236,236);
+  border: none;
+  border-radius: 20px;
+}
+
+.create-post-button {
+  margin-right: 30px;
+  width: 100px;
+  height: 40px;
+  font-family: 'Roboto', Arial;
+  font-weight: 500;
+  color: rgb(54, 54, 54);
+  background-color: rgb(232,236,236);
+  border: solid;
+  border-color: rgb(179, 179, 179);
+  border-width: 1px;
+  border-radius: 5px;
+  transition: background-color 0.25s;
+}
+
+.create-post-button:hover {
+  background-color: rgb(255, 72, 0);
+  cursor: pointer;
+}
+
+.create-post-button.active {
+  background-color: rgb(255, 72, 0);
+}
+/* CSS for the banner ends here */
+
+/* CSS for the main container starts here */
+.main-view, .main-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+/* CSS for the main container ends here */
+
+/* CSS for the welcome page starts here */
+.welcome-container {
+  width: 100%;
+  height: 70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.welcome {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.welcome-text {
+  font-size: 36px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.welcome-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+}
+
+.welcome label {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.welcome input {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.welcome-button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+}
+
+.welcome button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 12px 80px 12px 80px;
+  width: 100%;
+}
+
+.welcome button:hover {
+  background-color: #45a049;
+}
+/* CSS for the welcome page ends here */
+
+/* CSS for the navbar starts here */
+.navbar {
+  top: 60px;
+  bottom: 0px;
+  left: 0px;
+  width: 275px;
+  border-right: solid;
+  border-width: 1px;
+  padding: 0px 20px 0px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.navbar-home {
+  font-family: 'Roboto', Arial;
+  font-weight: 500;
+  background-color: rgb(232,236,236);
+  width: 100%;
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 0px;
+  border: none;
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  transition: background-color 0.25s;
+}
+
+.navbar-home:hover {
+  cursor: pointer;
+  background-color: rgb(255, 72, 0);
+  align-items: center;
+}
+
+.navbar-home-text {
+  color: black;
+}
+
+.navbar-home.active {
+  background-color: rgb(255, 72, 0);
+}
+
+.navbar-delimiter {
+  width: 100%;
+  border-bottom: solid;
+  border-width: 1px;
+}
+
+.navbar-communities {
+  font-family: 'Roboto', Arial;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.navbar-create-community-button {
+  width: 100%;
+  height: 35px;
+  align-self: center;
+  font-family: 'Roboto', Arial;
+  font-weight: 500;
+  color: rgb(54, 54, 54);
+  background-color: rgb(232,236,236);
+  border: solid;
+  border-color: rgb(179, 179, 179);
+  border-width: 1px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  transition: background-color 0.25s;
+}
+
+.navbar-create-community-button:hover {
+  background-color: rgb(255, 72, 0);
+  cursor: pointer;
+}
+
+.navbar-create-community-button.active {
+  background-color: rgb(255, 72, 0);
+}
+
+.navbar-community-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+.navbar-community-list a {
+  width: 100%;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+}
+
+.navbar-community-list a.active {
+  background-color: rgb(255, 72, 0);
+}
+/* CSS for the navbar ends here */
+
+/* CSS for the home, community, and search pages starts here */
+.homepage, .communitypage, .searchpage {
+  width: 100%;
+}
+
+.homepage-header, .communitypage-header, .searchpage-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.homepage-header-text, .communitypage-header-text, .searchpage-header-text {
+  font-family: 'Roboto', Arial;
+  font-size: 30px;
+  font-weight: 700;
+  
+  padding: 0px 30px 0px 50px;
+}
+
+.homepage-buttons, .communitypage-buttons, .searchpage-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  width: 80%;
+  justify-content: flex-end;
+  position: sticky;
+}
+
+.homepage-buttons button, .communitypage-buttons button, .searchpage-buttons button {
+  font-family: 'Roboto', Arial;
+  height: 30px;
+  width: 90px;
+}
+
+.homepage-post-count, .communitypage-post-count, .searchpage-post-count {
+  font-family: 'Roboto', Arial;
+  font-size: 20px;
+  padding: 0px 0px 15px 50px;
+}
+
+.homepage-header-delimiter, .communitypage-header-delimiter, .searchpage-header-delimiter {
+  width: 97%;
+  border-bottom: solid;
+  border-width: 1px;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.homepage-posts, .communitypage-posts, .searchpage-posts {
+  width: 95%;
+  padding: 15px 0px 100px 50px;
+}
+
+.homepage-post, .communitypage-post, .searchpage-post {
+  font-family: 'Roboto', Arial;
+  padding: 20px 0px 0px 0px;
+}
+
+.homepage-post-source, .communitypage-post-source, .searchpage-post-source {
+  padding-bottom: 8px;
+}
+
+.homepage-post-title, .communitypage-post-title, .searchpage-post-title {
+  font-size: 20px;
+  font-weight: 500;
+  padding-bottom: 3px;
+}
+
+.homepage-post-flair, .communitypage-post-flair, .searchpage-post-flair {
+  padding-bottom: 10px;
+}
+
+.homepage-post-twentychars, .communitypage-post-twentychars, .searchpage-post-twentychars {
+  padding-bottom: 15px;
+}
+
+.homepage-post-views-comments, .communitypage-post-views-comments, .searchpage-post-views-comments {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  padding-bottom: 20px;
+}
+
+.homepage-post-delimiter, .communitypage-post-delimiter, .searchpage-post-delimiter  {
+  width: 100%;
+  border-bottom: dotted;
+  border-width: 1px;
+  margin: 0 auto;
+}
+/* CSS for the home page starts here */
+
+/* CSS for the community view page starts here */
+.community-info {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Roboto', Arial;
+  gap: 10px;
+  padding: 0px 0px 15px 50px;
+}
+
+.community-post-count-member-count {
+  font-size: 20px;
+}
+/* CSS for the community view page ends here */
+
+/* CSS for post page starts here */
+.post-page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.post-details {
+  font-family: 'Roboto', Arial;   
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 50%;
+  margin-right: 10%;
+  margin-left: 20px;
+  margin-top: 1%;
+}
+
+.post-title {
+  font-size: 30px;
+  margin-top: 5px;
+}
+
+.post-content {
+  margin-top: 20px;
+}
+
+.post-stats {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+}
+
+.comment-button {
+  margin-top: 10px;
+  width: 100px;
+}
+
+.post-comment-delimiter {
+  margin-top: 15px;
+  border-top: solid;
+  border-width: 1px;
+}
+
+.post-comments-container {
+  padding-bottom: 100px;
+}
+
+/* CSS for the post page ends here */
+
+/* CSS for the new community page starts here */
+.new-community {
+  width: 100%;
+}
+
+.community-form {
+  font-family: 'Roboto', Arial;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+#community-name {
+  width: 300px;
+  height: 30px;
+}
+
+#community-desc {
+  width: 500px;
+  height: 100px;
+}
+
+#creator-username {
+  width: 200px;
+}
+/* CSS for the new community page ends here */
+
+/* CSS for the new post page starts here */
+.new-post {
+  width: 100%;
+}
+
+.post-form {
+  font-family: 'Roboto', Arial;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.community-select {
+  width: 300px;
+}
+
+.link-flair-select {
+  width: 300px;
+}
+
+#post-title {
+  width: 300px;;
+}
+
+#new-link-flair {
+  width: 300px;
+}
+#post-content {
+  width: 300px;
+}
+
+#username {
+  width: 300px;
+}
+/* CSS for the new post page ends here */
+
+/* CSS for the new comment page starts here */
+.new-comment {
+  width: 100%;
+}
+
+.comment-form {
+  font-family: 'Roboto', Arial;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+#comment-content {
+  width: 400px;
+  height: 150px;
+}
+
+#comment-username {
+  width: 200px;
+}
+/* CSS for the new comment page ends here */
+
+/* Scroll only for the main area views */
+
+.main-container {
+  overflow-y: auto;
+}
+
+/* */
