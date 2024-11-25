@@ -44,7 +44,6 @@ app.post("/users/new", async (req, res) => {
     const {firstName, lastName, email, password, displayName} = req.body;
     try {
         const emailLowerCase = email.toLowerCase();
-        const displayNameLowerCase = displayName.toLowerCase();
 
         // check if the email already exists in the database
         const existingEmail = await User.findOne({ email: emailLowerCase });
@@ -53,7 +52,7 @@ app.post("/users/new", async (req, res) => {
         }
 
         // check if the display name already exists in the database
-        const existingDisplayName = await User.findOne({ displayName: displayNameLowerCase });
+        const existingDisplayName = await User.findOne({ displayName: displayName });
         if (existingDisplayName) {
             return res.status(400).json({ message: "Display name already registered." });
         }
@@ -67,7 +66,7 @@ app.post("/users/new", async (req, res) => {
             lastName,
             email: emailLowerCase,
             password: hashedPassword,
-            displayName: displayNameLowerCase,
+            displayName: displayName,
             role: 'member'
         })
 
