@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function Banner({ setSearchQuery, displayPage, curPage, setCurCommunityID }) {
+export default function Banner({ setSearchQuery, displayPage, curPage, setCurCommunityID, isLoggedIn, handleLogout }) {
 
     const [input, setInput] = useState('');
 
@@ -26,10 +26,20 @@ export default function Banner({ setSearchQuery, displayPage, curPage, setCurCom
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={search}
             />
-            <button className={`create-post-button ${curPage === 'newpost' ? 'active': ''}`} onClick={() => {
-                setCurCommunityID(null);
-                displayPage('newpost');
-            }}>Create Post</button>
+            <div className="banner-buttons">
+              <button className={`create-post-button ${curPage === 'newpost' ? 'active': ''}`} onClick={() => {
+                  setCurCommunityID(null);
+                  displayPage('newpost');
+              }}>Create Post</button>
+              {isLoggedIn && (
+                <button
+                    className="logout-button"
+                    onClick={() => handleLogout()} 
+                >
+                  Logout
+                </button>
+              )}
+            </div>
         </div>
     );
 }
