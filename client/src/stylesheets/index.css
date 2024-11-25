@@ -62,7 +62,7 @@ a {
   border-radius: 20px;
 }
 
-.create-post-button {
+.banner-buttons button {
   margin-right: 30px;
   width: 100px;
   height: 40px;
@@ -77,12 +77,12 @@ a {
   transition: background-color 0.25s;
 }
 
-.create-post-button:hover {
+.banner-buttons button:hover {
   background-color: rgb(255, 72, 0);
   cursor: pointer;
 }
 
-.create-post-button.active {
+.banner-buttons button.active {
   background-color: rgb(255, 72, 0);
 }
 /* CSS for the banner ends here */
