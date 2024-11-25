@@ -13,6 +13,7 @@ import Navbar from './components/comp-navbar.jsx';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [displayName, setDisplayName] = useState('');
 
   const [curPage, setCurPage] = useState('welcome');
   const [curCommunityID, setCurCommunityID] = useState('null');
@@ -25,6 +26,9 @@ function App() {
     try {
       const response = await axios.get('http://localhost:8000/users/loggedIn', {withCredentials: true});
       setIsLoggedIn(response.data.isLoggedIn);
+      if (response.data.isLoggedIn) {
+        setDisplayName(response.data.displayName);
+      }
     } catch (error) {
       console.error("Error checking login status:", error);
     }
@@ -55,12 +59,12 @@ function App() {
 
   return (
     <section className="phreddit">
-      <Banner setSearchQuery={setSearchQuery} displayPage={displayPage} curPage={curPage} setCurCommunityID={setCurCommunityID} isLoggedIn={isLoggedIn} handleLogout={handleLogout}/>
-      {curPage === 'welcome' ? <Welcome displayPage={displayPage} /> : null}
-      {curPage === 'sign-up' ? <SignUp displayPage={displayPage} /> : null}
-      {curPage === 'login' ? <Login displayPage={displayPage} updateLoginStatus={updateLoginStatus} /> : null}
+      <Banner setSearchQuery={setSearchQuery} displayPage={displayPage} curPage={curPage} setCurCommunityID={setCurCommunityID} isLoggedIn={isLoggedIn} handleLogout={handleLogout} displayName={displayName}/>
       <div className="main-view">
-        {curPage != 'welcome' && curPage != 'sign-up' && curPage != 'login' ? <Navbar displayPage={displayPage} curPage={curPage} curCommunityID={curCommunityID} setCurCommunityID={setCurCommunityID}/>: null}
+        <Navbar displayPage={displayPage} curPage={curPage} curCommunityID={curCommunityID} setCurCommunityID={setCurCommunityID} isLoggedIn={isLoggedIn}/>
+        {curPage === 'welcome' ? <Welcome displayPage={displayPage} /> : null}
+        {curPage === 'sign-up' ? <SignUp displayPage={displayPage} /> : null}
+        {curPage === 'login' ? <Login displayPage={displayPage} updateLoginStatus={updateLoginStatus} /> : null}
       </div>
     </section>
   );

@@ -68,7 +68,7 @@ a {
   height: 40px;
   font-family: 'Roboto', Arial;
   font-weight: 500;
-  color: rgb(54, 54, 54);
+  color: red(54, 54, 54);
   background-color: rgb(232,236,236);
   border: solid;
   border-color: rgb(179, 179, 179);
@@ -85,6 +85,32 @@ a {
 .banner-buttons button.active {
   background-color: rgb(255, 72, 0);
 }
+
+#gray-post-button {
+  color: rgb(99, 99, 99);
+  background-color: rgb(182, 181, 181);
+}
+
+#gray-post-button:hover {
+  cursor:default;
+}
+
+#profile-button-guest {
+  color: white;
+  font-weight: 700;
+  background-color: rgb(255, 72, 0);
+  border-color: white;
+  border-radius: 85px;
+}
+
+#profile-button-user {
+  color: white;
+  font-weight: 700;
+  background-color: rgb(255, 72, 0);
+  border-color: white;
+  border-radius: 85px;
+}
+
 /* CSS for the banner ends here */
 
 /* CSS for the main container starts here */
@@ -228,7 +254,7 @@ a {
   width: 100%;
 }
 
-.navbar-create-community-button {
+.navbar-communities button {
   width: 100%;
   height: 35px;
   align-self: center;
@@ -244,12 +270,12 @@ a {
   transition: background-color 0.25s;
 }
 
-.navbar-create-community-button:hover {
+.navbar-communities button:hover {
   background-color: rgb(255, 72, 0);
   cursor: pointer;
 }
 
-.navbar-create-community-button.active {
+.navbar-communities button.active {
   background-color: rgb(255, 72, 0);
 }
 
@@ -270,6 +296,15 @@ a {
 
 .navbar-community-list a.active {
   background-color: rgb(255, 72, 0);
+}
+
+#gray-community-button {
+  color: rgb(99, 99, 99);
+  background-color: rgb(182, 181, 181);
+}
+
+#gray-community-button:hover {
+  cursor:default;
 }
 /* CSS for the navbar ends here */
 

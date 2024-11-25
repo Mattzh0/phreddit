@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-export default function Navbar({displayPage, curPage, curCommunityID, setCurCommunityID}) {
+export default function Navbar({displayPage, curPage, curCommunityID, setCurCommunityID, isLoggedIn }) {
     const [communities, setCommunities] = useState([]);
 
     /* useEffect(() => {
@@ -32,10 +32,11 @@ export default function Navbar({displayPage, curPage, curCommunityID, setCurComm
         <div className="navbar-delimiter"></div>
         <div className="navbar-communities">
           <p>Communities</p>
-          <button className={`navbar-create-community-button ${curPage === 'newcommunity' ? 'active' : ''}`} onClick={() =>{
+          {!isLoggedIn && <button id="gray-community-button">Create Community</button>}
+          {isLoggedIn && <button className={`navbar-create-community-button ${curPage === 'newcommunity' ? 'active' : ''}`} onClick={() =>{
             setCurCommunityID(null);
             displayPage('newcommunity');
-          }}>Create Community</button>
+          }}>Create Community</button>}
           <div className="navbar-community-list">
              {communities.map(community => 
                 <a
