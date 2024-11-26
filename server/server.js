@@ -135,7 +135,7 @@ app.get("/communities", async (req, res) => {
     }
 });
 
-app.get('/communities/:displayName', async (req, res) => {
+app.get('/communities/user/:displayName', async (req, res) => {
     try {
         const name = req.params.displayName
         const communities = await Community.find({members: name})
@@ -144,7 +144,48 @@ app.get('/communities/:displayName', async (req, res) => {
     catch {
         res.status(500).json({ message: "Error fetching the user's communities", error: error.message });
     }
-})
+});
+
+app.get("/communities/:communityID", async (req, res) => {
+    try {
+        const communityID = req.params.communityID;
+        const community = await Community.findById(communityID);
+        res.status(200).json(community);
+    }
+    catch (error) {
+        res.status(500).json({ message: "Error fetching community", error: error.message });
+    }
+});
+
+app.post("/communities/leave", async (req, res) => {
+    const { communityID, displayName } = req.body;
+
+    try {
+        const response = await Community.updateOne(
+            { _id: communityID },
+            { $pull: { members: displayName }}
+        );
+        res.status(200).json({ message: "Removal Successful"});
+    }
+    catch(error) {
+        res.status(500).json({ message: "Error removing member from community", error: error.message });
+    }
+});
+
+app.post("/communities/join", async (req, res) => {
+    const { communityID, displayName } = req.body;
+
+    try {
+        const response = await Community.updateOne(
+            { _id: communityID },
+            { $push: { members: displayName }}
+        );
+        res.status(200).json({ message: "Join Successful"});
+    }
+    catch(error) {
+        res.status(500).json({ message: "Error adding member to community", error: error.message });
+    }
+});
 
 app.get('/posts', async (req, res) => {
     try {

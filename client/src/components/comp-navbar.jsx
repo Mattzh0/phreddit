@@ -32,7 +32,7 @@ export default function Navbar({displayPage, curPage, curCommunityID, setCurComm
 
     const handleCommunityClick = (communityID) => {
       setCurCommunityID(communityID);
-      displayPage('community', communityID=communityID);
+      displayPage('community', communityID);
     }
 
     return(
