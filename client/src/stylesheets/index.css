@@ -360,7 +360,12 @@ a {
 
 .homepage-posts, .communitypage-posts, .searchpage-posts {
   width: 95%;
-  padding: 15px 0px 100px 50px;
+  padding: 15px 0px 0px 50px;
+}
+
+#homepage-memberposts {
+  border-bottom: solid;
+  border-bottom-width: 1px;
 }
 
 .homepage-post, .communitypage-post, .searchpage-post {
