@@ -141,6 +141,15 @@ async function initializeDB() {
 
       let postRef1 = await createPost(post1);
 
+      const community2 = {
+        name: 'Another',
+        description: 'Does not matter',
+        postIDs: [],
+        startDate: new Date(),
+        members: ['rollo']
+      };
+      let communityRef2 = await createCommunity(community2);
+
       // create community objects
       const community1 = {
           name: 'Am I the Jerk?',

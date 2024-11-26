@@ -61,7 +61,7 @@ function App() {
     <section className="phreddit">
       <Banner setSearchQuery={setSearchQuery} displayPage={displayPage} curPage={curPage} setCurCommunityID={setCurCommunityID} isLoggedIn={isLoggedIn} handleLogout={handleLogout} displayName={displayName}/>
       <div className="main-view">
-        <Navbar displayPage={displayPage} curPage={curPage} curCommunityID={curCommunityID} setCurCommunityID={setCurCommunityID} isLoggedIn={isLoggedIn}/>
+        <Navbar displayPage={displayPage} curPage={curPage} curCommunityID={curCommunityID} setCurCommunityID={setCurCommunityID} isLoggedIn={isLoggedIn} displayName={displayName}/>
         {curPage === 'welcome' ? <Welcome displayPage={displayPage} /> : null}
         {curPage === 'sign-up' ? <SignUp displayPage={displayPage} /> : null}
         {curPage === 'login' ? <Login displayPage={displayPage} updateLoginStatus={updateLoginStatus} /> : null}
