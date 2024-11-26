@@ -126,4 +126,13 @@ app.get('/users/loggedIn', (req, res) => {
     }
 });
 
+app.get("/communities", async (req, res) => {
+    try {
+        const communities = await Community.find();
+        res.status(200).json(communities);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching communities", error: error.message });
+    }
+});
+
 app.listen(port, () => {console.log("Server listening on port 8000...");});
