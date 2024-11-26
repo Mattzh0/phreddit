@@ -8,6 +8,7 @@ import Welcome from './components/pg-welcome.jsx';
 import SignUp from './components/pg-signup.jsx';
 import Login from './components/pg-login.jsx';
 import Navbar from './components/comp-navbar.jsx';
+import Homepage from './components/pg-home.jsx';
 
 
 
@@ -65,6 +66,7 @@ function App() {
         {curPage === 'welcome' ? <Welcome displayPage={displayPage} /> : null}
         {curPage === 'sign-up' ? <SignUp displayPage={displayPage} /> : null}
         {curPage === 'login' ? <Login displayPage={displayPage} updateLoginStatus={updateLoginStatus} /> : null}
+        {curPage === 'home' ? <Homepage displayPage={displayPage} isLoggedIn={isLoggedIn} displayName={displayName} /> : null}
       </div>
     </section>
   );

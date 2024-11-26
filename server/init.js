@@ -137,18 +137,10 @@ async function initializeDB() {
           postedDate: new Date('August 23, 2024 01:19:00'),
           commentIDs: [commentRef1, commentRef2],
           views: 14,
+          upvotes: 0,
       };
 
       let postRef1 = await createPost(post1);
-
-      const community2 = {
-        name: 'Another',
-        description: 'Does not matter',
-        postIDs: [],
-        startDate: new Date(),
-        members: ['rollo']
-      };
-      let communityRef2 = await createCommunity(community2);
 
       // create community objects
       const community1 = {
