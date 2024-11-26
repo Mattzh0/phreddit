@@ -20,7 +20,7 @@ export default function Homepage({ displayPage, isLoggedIn, displayName }) {
             setPosts(defaultSortedPosts);
           }
           else {
-            const memberCommunitiesReponse = await axios.get(`http://localhost:8000/communities/${displayName}`);
+            const memberCommunitiesReponse = await axios.get(`http://localhost:8000/communities/user/${displayName}`);
             const memberCommunities = memberCommunitiesReponse.data;
             const memberPostIDs = [];
 

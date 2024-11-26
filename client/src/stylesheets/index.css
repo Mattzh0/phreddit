@@ -338,6 +338,29 @@ a {
   position: sticky;
 }
 
+.join-leave-community-button {
+  color: white;
+  font-weight: 700;
+  background-color: rgb(255, 72, 0);
+  border-color: white;
+  border-radius: 85px;
+  width: 60px;
+  display: flex;
+  height: 30px;
+  justify-content: center;
+  align-items: center;
+}
+
+.join-leave-community-button-text {
+  color: white;
+  font-weight: 700;
+}
+
+.join-leave-parent {
+  padding-left: 50px;
+  padding-bottom: 15px;
+}
+
 .homepage-buttons button, .communitypage-buttons button, .searchpage-buttons button {
   font-family: 'Roboto', Arial;
   height: 30px;
