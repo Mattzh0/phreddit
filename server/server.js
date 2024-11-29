@@ -126,4 +126,119 @@ app.get('/users/loggedIn', (req, res) => {
     }
 });
 
+app.get("/communities", async (req, res) => {
+    try {
+        const communities = await Community.find();
+        res.status(200).json(communities);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching communities", error: error.message });
+    }
+});
+
+app.get('/communities/user/:displayName', async (req, res) => {
+    try {
+        const name = req.params.displayName
+        const communities = await Community.find({members: name})
+        res.status(200).json(communities);
+    }
+    catch {
+        res.status(500).json({ message: "Error fetching the user's communities", error: error.message });
+    }
+});
+
+app.get("/communities/:communityID", async (req, res) => {
+    try {
+        const communityID = req.params.communityID;
+        const community = await Community.findById(communityID);
+        res.status(200).json(community);
+    }
+    catch (error) {
+        res.status(500).json({ message: "Error fetching community", error: error.message });
+    }
+});
+
+app.post("/communities/leave", async (req, res) => {
+    const { communityID, displayName } = req.body;
+
+    try {
+        const response = await Community.updateOne(
+            { _id: communityID },
+            { $pull: { members: displayName }}
+        );
+        res.status(200).json({ message: "Removal Successful"});
+    }
+    catch(error) {
+        res.status(500).json({ message: "Error removing member from community", error: error.message });
+    }
+});
+
+app.post("/communities/join", async (req, res) => {
+    const { communityID, displayName } = req.body;
+
+    try {
+        const response = await Community.updateOne(
+            { _id: communityID },
+            { $push: { members: displayName }}
+        );
+        res.status(200).json({ message: "Join Successful"});
+    }
+    catch(error) {
+        res.status(500).json({ message: "Error adding member to community", error: error.message });
+    }
+});
+
+app.get('/posts', async (req, res) => {
+    try {
+        const posts = await Post.find();
+        res.status(200).json(posts);
+    }
+    catch {
+        res.status(500).json({ message: "Error fetching posts", error: error.message });
+    }
+});
+
+app.get('/posts/:postID', async (req, res) => {
+    try {
+        const postID = req.params.postID;
+        const post = await Post.findById(postID);
+        res.status(200).json(post);
+    }
+    catch(error) {
+        res.status(500).json({ message: "Error fetching post", error: error.message });
+    }
+});
+
+app.get('/linkflairs', async (req, res) => {
+    try {
+        const linkflairs = await LinkFlair.find();
+        res.status(200).json(linkflairs);
+    }
+    catch {
+        res.status(500).json({ message: "Error fetching link flairs", error: error.message });
+    }
+});
+
+app.get('/comments', async (req, res) => {
+    try {
+        const comments = await Comment.find();
+        res.status(200).json(comments);
+    }
+    catch {
+        res.status(500).json({ message: "Error fetching comments", error: error.message });
+    }
+});
+
+app.post('/posts/:postID/views', async (req, res) => {
+    try {
+        const { postID } = req.params;
+        
+        await Post.findByIdAndUpdate(postID, { $inc: { views: 1 } });
+
+        res.status(200).send({ message: 'View count incremented successfully' });
+    } 
+    catch (error) {
+        res.status(500).send({ message: 'Error incrementing view count' });
+    }
+});
+
 app.listen(port, () => {console.log("Server listening on port 8000...");});

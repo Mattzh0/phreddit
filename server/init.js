@@ -137,6 +137,7 @@ async function initializeDB() {
           postedDate: new Date('August 23, 2024 01:19:00'),
           commentIDs: [commentRef1, commentRef2],
           views: 14,
+          upvotes: 0,
       };
 
       let postRef1 = await createPost(post1);

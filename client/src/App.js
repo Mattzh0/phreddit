@@ -8,8 +8,8 @@ import Welcome from './components/pg-welcome.jsx';
 import SignUp from './components/pg-signup.jsx';
 import Login from './components/pg-login.jsx';
 import Navbar from './components/comp-navbar.jsx';
-
-
+import Homepage from './components/pg-home.jsx';
+import Communitypage from './components/pg-community.jsx';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -61,10 +61,12 @@ function App() {
     <section className="phreddit">
       <Banner setSearchQuery={setSearchQuery} displayPage={displayPage} curPage={curPage} setCurCommunityID={setCurCommunityID} isLoggedIn={isLoggedIn} handleLogout={handleLogout} displayName={displayName}/>
       <div className="main-view">
-        <Navbar displayPage={displayPage} curPage={curPage} curCommunityID={curCommunityID} setCurCommunityID={setCurCommunityID} isLoggedIn={isLoggedIn}/>
+        <Navbar displayPage={displayPage} curPage={curPage} curCommunityID={curCommunityID} setCurCommunityID={setCurCommunityID} isLoggedIn={isLoggedIn} displayName={displayName}/>
         {curPage === 'welcome' ? <Welcome displayPage={displayPage} /> : null}
         {curPage === 'sign-up' ? <SignUp displayPage={displayPage} /> : null}
         {curPage === 'login' ? <Login displayPage={displayPage} updateLoginStatus={updateLoginStatus} /> : null}
+        {curPage === 'home' ? <Homepage displayPage={displayPage} isLoggedIn={isLoggedIn} displayName={displayName} /> : null}
+        {curPage === 'community' && curCommunityID ? <Communitypage displayPage={displayPage} communityID={curCommunityID} isLoggedIn={isLoggedIn} displayName={displayName}/> : null}
       </div>
     </section>
   );

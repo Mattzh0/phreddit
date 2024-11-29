@@ -1,24 +1,38 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-export default function Navbar({displayPage, curPage, curCommunityID, setCurCommunityID, isLoggedIn }) {
+export default function Navbar({displayPage, curPage, curCommunityID, setCurCommunityID, isLoggedIn, displayName }) {
     const [communities, setCommunities] = useState([]);
 
-    /* useEffect(() => {
+    useEffect(() => {
       const fetchCommunities = async () => {
           try {
               const response = await axios.get('http://localhost:8000/communities');
-              setCommunities(response.data);
+              let communities = response.data;
+              communities = communities.sort((a, b) => {
+                const aCommunityMember = a.members.includes(displayName);
+                const bCommunityMember = b.members.includes(displayName);
+
+                if (aCommunityMember && !bCommunityMember) {
+                  return -1;
+                }
+                else if (!aCommunityMember && bCommunityMember) {
+                  return 1;
+                }
+                return 0;
+
+              });
+              setCommunities(communities);
           } catch (error) {
               console.error("Error fetching communities:", error);
           }
       };
       fetchCommunities();
-    }, [curCommunityID]); */
+    }, [curCommunityID, displayName]);
 
     const handleCommunityClick = (communityID) => {
       setCurCommunityID(communityID);
-      displayPage('community', communityID=communityID);
+      displayPage('community', communityID);
     }
 
     return(
