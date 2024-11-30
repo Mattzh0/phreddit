@@ -68,7 +68,7 @@ a {
   height: 40px;
   font-family: 'Roboto', Arial;
   font-weight: 500;
-  color: red(54, 54, 54);
+  color: rgb(54, 54, 54);
   background-color: rgb(232,236,236);
   border: solid;
   border-color: rgb(179, 179, 179);
@@ -386,7 +386,7 @@ a {
   padding: 15px 0px 0px 50px;
 }
 
-#homepage-memberposts {
+#homepage-memberposts, #searchpage-memberposts {
   border-bottom: solid;
   border-bottom-width: 1px;
 }
