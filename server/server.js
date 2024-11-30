@@ -208,6 +208,49 @@ app.get('/posts/:postID', async (req, res) => {
     }
 });
 
+app.post('/posts/:postID/views', async (req, res) => {
+    try {
+        const { postID } = req.params;
+        
+        await Post.findByIdAndUpdate(postID, { $inc: { views: 1 } });
+
+        res.status(200).send({ message: 'View count incremented successfully' });
+    } 
+    catch (error) {
+        res.status(500).send({ message: 'Error incrementing view count' });
+    }
+});
+
+app.get('/posts/search/:searchQuery', async (req, res) => {
+    try {
+        const searchQuery = req.params.searchQuery;
+        const terms = searchQuery.split(' ')
+        
+        const regexArray = terms.map(term => new RegExp(`\\b${term}\\b`, 'i'));
+
+        const searchedPosts = await Post.find({
+            $or: [{ title: { $in: regexArray } }, { content: { $in: regexArray } }]
+        });
+
+        res.status(200).json(searchedPosts);
+    }
+    catch {
+        res.status(500).json({ message: "Error fetching searched posts", error: error.message });
+    }
+}) 
+
+app.get('/posts/comment/:commentID', async (req, res) => {
+    try {
+        const commentID = req.params.commentID;
+        const postWithComment = await Post.find({commentIDs: commentID})
+        res.status(200).json(postWithComment);
+    }
+    catch {
+        res.status(500).json({ message: "Error fetching posts with the specificed comment", error: error.message });
+    }
+})
+
+
 app.get('/linkflairs', async (req, res) => {
     try {
         const linkflairs = await LinkFlair.find();
@@ -215,6 +258,16 @@ app.get('/linkflairs', async (req, res) => {
     }
     catch {
         res.status(500).json({ message: "Error fetching link flairs", error: error.message });
+    }
+});
+
+app.get("/linkflairs/:linkFlairID", async (req, res) => {
+    try {
+        const linkFlairID = req.params.linkFlairID;
+        const flair = await LinkFlair.findById(linkFlairID);
+        res.status(200).json(flair);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching link flair", error: error.message });
     }
 });
 
@@ -228,17 +281,41 @@ app.get('/comments', async (req, res) => {
     }
 });
 
-app.post('/posts/:postID/views', async (req, res) => {
+app.get('/comments/:commentID', async (req, res) => {
     try {
-        const { postID } = req.params;
-        
-        await Post.findByIdAndUpdate(postID, { $inc: { views: 1 } });
-
-        res.status(200).send({ message: 'View count incremented successfully' });
-    } 
-    catch (error) {
-        res.status(500).send({ message: 'Error incrementing view count' });
+        const comment = await Comment.findById(req.params.commentID);
+        res.status(200).json(comment);
     }
-});
+    catch {
+        res.status(500).json({ message: "Error fetching comment", error: error.message });
+    }
+})
+
+app.get('/comments/search/:searchQuery', async (req, res) => {
+    try {
+        const searchQuery = req.params.searchQuery;
+        const terms = searchQuery.split(' ')
+        
+        const regexArray = terms.map(term => new RegExp(`\\b${term}\\b`, 'i'));
+
+        const searchedComments = await Comment.find({ content: { $in: regexArray } });
+
+        res.status(200).json(searchedComments);
+    }
+    catch {
+        res.status(500).json({ message: "Error fetching searched comments", error: error.message });
+    }
+})
+
+app.get('/comments/parent/:commentID', async (req, res) => {
+    try {
+        const commentID = req.params.commentID;
+        const parentComment = await Comment.find({commentIDs: commentID})
+        res.status(200).json(parentComment);
+    }
+    catch {
+        res.status(500).json({ message: "Error fetching the parent comment of the specified comment", error: error.message });
+    }
+})
 
 app.listen(port, () => {console.log("Server listening on port 8000...");});

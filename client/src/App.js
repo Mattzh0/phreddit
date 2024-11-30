@@ -10,6 +10,7 @@ import Login from './components/pg-login.jsx';
 import Navbar from './components/comp-navbar.jsx';
 import Homepage from './components/pg-home.jsx';
 import Communitypage from './components/pg-community.jsx';
+import Searchpage from './components/pg-search.jsx';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -67,6 +68,7 @@ function App() {
         {curPage === 'login' ? <Login displayPage={displayPage} updateLoginStatus={updateLoginStatus} /> : null}
         {curPage === 'home' ? <Homepage displayPage={displayPage} isLoggedIn={isLoggedIn} displayName={displayName} /> : null}
         {curPage === 'community' && curCommunityID ? <Communitypage displayPage={displayPage} communityID={curCommunityID} isLoggedIn={isLoggedIn} displayName={displayName}/> : null}
+        {curPage === 'search' ? <Searchpage searchQuery={searchQuery} displayPage={displayPage} isLoggedIn={isLoggedIn} displayName={displayName}/> : null}
       </div>
     </section>
   );
