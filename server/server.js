@@ -188,6 +188,40 @@ app.post("/communities/leave", async (req, res) => {
     }
 });
 
+// creates a new community
+app.post('/communities/new', async (req, res) => {
+    const { name, description, postIDs, startDate, members, memberCount } = req.body;
+
+    try {
+        const newCommunity = new Community({
+            name,
+            description,
+            postIDs,
+            startDate,
+            members,
+            memberCount,
+        });
+        const savedCommunity = await newCommunity.save();
+        res.status(201).json(savedCommunity);
+    } 
+    catch (error) {
+        res.status(500).json({ message: "Error saving new community", error: error.message });
+    }
+});
+
+// checks if a community name already exists
+app.get('/communities/exists/:communityName', async (req, res) => {
+    const name = req.params.communityName;
+
+    try {
+        const exists = await Community.exists({ name });
+        res.status(200).json(exists);
+    }
+    catch(error) {
+        res.status(500).json({ message: "Name does not exist", error: error.message });
+    }
+});
+
 // adds a member to a community
 app.post("/communities/join", async (req, res) => {
     const { communityID, displayName } = req.body;
@@ -417,5 +451,80 @@ app.get('/comments/parent/:commentID', async (req, res) => {
         res.status(500).json({ message: "Error fetching the parent comment of the specified comment", error: error.message });
     }
 })
+
+app.post('/posts/new', async (req, res) => {
+    const { title, content, linkFlairID, postedBy, postedDate, commentIDs, views, communityID } = req.body;
+    try {
+        const newPost = new Post({
+            title,
+            content,
+            linkFlairID,
+            postedBy,
+            postedDate,
+            commentIDs,
+            views
+        })
+
+        const savedPost = await newPost.save();
+        const community = await Community.findById(communityID);
+        community.postIDs.push(savedPost._id);
+        await community.save();
+
+        res.status(201).json(savedPost);
+    }
+    catch (error) {
+        res.status(500).json({message: "Error saving new post", error: error.message});
+    }
+});
+
+app.post('/linkflairs/new', async (req, res) => {
+    const { content } = req.body;
+    try {
+        const newLinkFlair = new LinkFlair({
+            content
+        })
+        const savedLinkFlair = await newLinkFlair.save();
+        res.status(201).json(savedLinkFlair);
+    }
+    catch (error) {
+        res.status(500).json({message: "Error saving new new link flair", error: error.message});
+    }
+});
+
+app.post('/comments/new', async (req, res) => {
+    const { content, commentIDs, commentedBy, commentedDate, postID, replyingToID } = req.body;
+    try {
+
+        const newComment = new Comment({
+            content,
+            commentIDs,
+            commentedBy,
+            commentedDate
+        });
+
+        const savedComment = await newComment.save();
+
+        if (replyingToID) {
+            const replyingTo = await Comment.findById(replyingToID);
+            replyingTo.commentIDs.push(savedComment._id);
+            await replyingTo.save();
+        }
+        else {
+            try {
+                const post = await Post.findById(postID)
+                post.commentIDs.push(savedComment._id);
+                await post.save();
+            }
+            catch(error) {
+                console.error("Error creating comment", error);
+            }
+        }
+
+        res.status(201).json(savedComment);
+    }
+    catch(error) {
+        res.status(500).json({message: "Error saving new comment", error: error.message});
+    }
+});
 
 app.listen(port, () => {console.log("Server listening on port 8000...");});
