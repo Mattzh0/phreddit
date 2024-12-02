@@ -98,8 +98,9 @@ async function createAdminUser(email, password) {
       lastName: 'PhredditAdministrator',
       email: email,
       password: hashedPassword,
-      displayName: 'PhredditAdministrator',
+      displayName: 'PhredditAdmin',
       role: 'admin',
+      reputation: 1000
   });
   return newUser.save();
 }
@@ -122,63 +123,68 @@ async function initializeDB() {
     let linkFlairRef4 = await createLinkFlair(linkFlair4);
 
     // Create comment objects
-    const comment1 = {
-      content: 'There is no higher calling than the protection of Tesla products.',
-      commentedBy: 'shemp',
-      commentedDate: new Date('August 23, 2024 08:22:00'),
-      commentIDs: [],
-    };
-    const comment2 = {
-      content: 'Obvious rage bait, but if not, then you are absolutely the jerk in this situation.',
-      commentedBy: 'astyanax',
-      commentedDate: new Date('August 23, 2024 10:57:00'),
-      commentIDs: [],
-    };
-    const comment3 = {
-      content: 'My brother in Christ, are you ok? Also, YTJ.',
-      commentedBy: 'rollo',
-      commentedDate: new Date('August 23, 2024 09:31:00'),
-      commentIDs: [],
-    };
-    const comment4 = {
-      content: 'The truth is out there.',
-      commentedBy: 'astyanax',
-      commentedDate: new Date('September 10, 2024 06:41:00'),
-      commentIDs: [],
-    };
-    const comment5 = {
-      content: 'The same thing happened to me. I guess this channel does still show real history.',
-      commentedBy: 'bigfeet',
-      commentedDate: new Date('September 09, 2024 17:03:00'),
-      commentIDs: [],
-    };
-    const comment6 = {
-      content: 'I want to believe.',
-      commentedBy: 'outtheretruth47',
-      commentedDate: new Date('September 10, 2024 07:18:00'),
-      commentIDs: [],
-    };
-    const comment7 = {
+    const comment7 = { // comment 7
       content: 'Generic poster slogan #42',
-      commentedBy: 'bigfeet',
-      commentedDate: new Date('September 10, 2024 09:43:00'),
       commentIDs: [],
+      commentedBy: 'PhredditAdmin',
+      commentedDate: new Date('September 10, 2024 09:43:00'),
     };
-
-    let commentRef1 = await createComment(comment1);
-    let commentRef2 = await createComment(comment2);
-    let commentRef3 = await createComment(comment3);
-    let commentRef4 = await createComment(comment4);
-    let commentRef5 = await createComment(comment5);
-    let commentRef6 = await createComment(comment6);
     let commentRef7 = await createComment(comment7);
+    
+    const comment6 = { // comment 6
+        content: 'I want to believe.',
+        commentIDs: [commentRef7],
+        commentedBy: 'PhredditAdmin',
+        commentedDate: new Date('September 10, 2024 07:18:00'),
+    };
+    let commentRef6 = await createComment(comment6);
+    
+    const comment5 = { // comment 5
+        content: 'The same thing happened to me. I guest this channel does still show real history.',
+        commentIDs: [],
+        commentedBy: 'PhredditAdmin',
+        commentedDate: new Date('September 09, 2024 017:03:00'),
+    }
+    let commentRef5 = await createComment(comment5);
+    
+    const comment4 = { // comment 4
+        content: 'The truth is out there.',
+        commentIDs: [commentRef6],
+        commentedBy: "PhredditAdmin",
+        commentedDate: new Date('September 10, 2024 6:41:00'),
+    };
+    let commentRef4 = await createComment(comment4);
+    
+    const comment3 = { // comment 3
+        content: 'My brother in Christ, are you ok? Also, YTJ.',
+        commentIDs: [],
+        commentedBy: 'PhredditAdmin',
+        commentedDate: new Date('August 23, 2024 09:31:00'),
+    };
+    let commentRef3 = await createComment(comment3);
+    
+    const comment2 = { // comment 2
+        content: 'Obvious rage bait, but if not, then you are absolutely the jerk in this situation. Please delete your Tron vehicle and leave is in peace.  YTJ.',
+        commentIDs: [],
+        commentedBy: 'PhredditAdmin',
+        commentedDate: new Date('August 23, 2024 10:57:00'),
+    };
+    let commentRef2 = await createComment(comment2);
+    
+    const comment1 = { // comment 1
+        content: 'There is no higher calling than the protection of Tesla products.  God bless you sir and God bless Elon Musk. Oh, NTJ.',
+        commentIDs: [commentRef3],
+        commentedBy: 'PhredditAdmin',
+        commentedDate: new Date('August 23, 2024 08:22:00'),
+    };
+    let commentRef1 = await createComment(comment1);
 
     // create post objects
     const post1 = {
       title: 'AITJ: I parked my cybertruck in the handicapped spot',
       content: 'Recently I went to the store in my brand new Tesla cybertruck.',
       linkFlairID: linkFlairRef1,
-      postedBy: 'trucknutz69',
+      postedBy: 'PhredditAdmin',
       postedDate: new Date('August 23, 2024 01:19:00'),
       commentIDs: [commentRef1, commentRef2],
       views: 14,
@@ -187,7 +193,7 @@ async function initializeDB() {
       title: 'Remember when this was a HISTORY channel?',
       content: 'Does anyone else remember when they used to show actual historical content... I',
       linkFlairID: linkFlairRef3,
-      postedBy: 'MarcoArelius',
+      postedBy: 'PhredditAdmin',
       postedDate: new Date('September 9, 2024 14:24:00'),
       commentIDs: [commentRef4, commentRef5],
       views: 1023,
@@ -202,14 +208,14 @@ async function initializeDB() {
       description: 'A practical application of the principles of justice.',
       postIDs: [postRef1],
       startDate: new Date('August 10, 2014 04:18:00'),
-      members: ['rollo', 'shemp', 'catlady13', 'astyanax', 'trucknutz69'],
+      members: ['PhredditAdmin'],
     };
     const community2 = {
       name: 'The History Channel',
       description: 'A fantastical retelling of history and beyond.',
       postIDs: [postRef2],
       startDate: new Date('September 1, 2020 08:00:00'),
-      members: ['bigfeet', 'outtheretruth47', 'MarcoArelius'],
+      members: ['PhredditAdmin'],
     };
 
     let communityRef1 = await createCommunity(community1);

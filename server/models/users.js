@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true
+    },
+    reputation: {
+      type: Number,
+      default: 100
     }
   }
 )

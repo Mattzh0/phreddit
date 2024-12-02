@@ -492,6 +492,25 @@ a {
   padding-bottom: 100px;
 }
 
+.comment-details {
+  margin-bottom: 5px;
+}
+
+.comment-content {
+  margin-bottom: 10px;
+}
+
+.comment-vote-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.reply-button {
+  margin-bottom: 15px;
+}
+
 /* CSS for the post page ends here */
 
 /* CSS for the new community page starts here */
@@ -556,6 +575,13 @@ a {
 
 #username {
   width: 300px;
+}
+
+.post-vote-buttons {
+  display: flex;
+  margin-top: 10px;
+  flex-direction: row;
+  gap: 10px;
 }
 /* CSS for the new post page ends here */
 
