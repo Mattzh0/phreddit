@@ -12,6 +12,9 @@ import Homepage from './components/pg-home.jsx';
 import Communitypage from './components/pg-community.jsx';
 import Searchpage from './components/pg-search.jsx';
 import Postpage from './components/pg-post.jsx';
+import Newcommunity from './components/pg-newcommunity.jsx';
+import Newpost from './components/pg-newpost.jsx';
+import Newcomment from './components/pg-newcomment.jsx';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -71,6 +74,9 @@ function App() {
         {curPage === 'community' && curCommunityID ? <Communitypage displayPage={displayPage} communityID={curCommunityID} isLoggedIn={isLoggedIn} displayName={displayName}/> : null}
         {curPage === 'search' ? <Searchpage searchQuery={searchQuery} displayPage={displayPage} isLoggedIn={isLoggedIn} displayName={displayName}/> : null}
         {curPage === 'post' && curPost ? <Postpage displayPage={displayPage} post={curPost} isLoggedIn={isLoggedIn} displayName={displayName}/> : null} 
+        {curPage === 'newcommunity' ? <Newcommunity displayPage={displayPage} displayName={displayName} /> : null} 
+        {curPage === 'newpost' ? <Newpost displayPage={displayPage} displayName={displayName} /> : null} 
+        {curPage === 'newcomment' ? <Newcomment displayPage={displayPage} replyingTo={replyingTo} post={curPost} displayName={displayName}/> : null}
       </div>
     </section>
   );
