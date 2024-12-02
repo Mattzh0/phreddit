@@ -96,6 +96,7 @@ app.post('/users/login', async (req, res) => {
 
         // if credentials are correct, store user info in the session
         req.session.userId = user._id;
+        console.log(user.displayName);
         req.session.displayName = user.displayName;
 
         res.status(200).json({ message: "Login successful" });
@@ -115,7 +116,6 @@ app.get("/users/logout", (req, res) => {
             res.redirect("/");
         }
     });
-    
   });
 
 app.get('/users/loggedIn', (req, res) => {
@@ -126,6 +126,19 @@ app.get('/users/loggedIn', (req, res) => {
     }
 });
 
+app.get('/users/:displayName', async (req, res) => {
+    try {
+        const { displayName } = req.params;
+        console.log(displayName);
+        const user = await User.findOne({ displayName: displayName });
+
+        res.status(200).send(user);
+    } catch (error) {
+        console.error('Error fetching user:', error);
+    }
+});
+
+// fetches and returns all communities in the database
 app.get("/communities", async (req, res) => {
     try {
         const communities = await Community.find();
@@ -135,6 +148,7 @@ app.get("/communities", async (req, res) => {
     }
 });
 
+// fetches and returns all communities that a given user is in
 app.get('/communities/user/:displayName', async (req, res) => {
     try {
         const name = req.params.displayName
@@ -146,6 +160,7 @@ app.get('/communities/user/:displayName', async (req, res) => {
     }
 });
 
+// fetches and returns a specific community
 app.get("/communities/:communityID", async (req, res) => {
     try {
         const communityID = req.params.communityID;
@@ -157,6 +172,7 @@ app.get("/communities/:communityID", async (req, res) => {
     }
 });
 
+// removes a member from a community
 app.post("/communities/leave", async (req, res) => {
     const { communityID, displayName } = req.body;
 
@@ -172,6 +188,7 @@ app.post("/communities/leave", async (req, res) => {
     }
 });
 
+// adds a member to a community
 app.post("/communities/join", async (req, res) => {
     const { communityID, displayName } = req.body;
 
@@ -187,6 +204,18 @@ app.post("/communities/join", async (req, res) => {
     }
 });
 
+// fetches and returns the community that a specific post was made in
+app.get("/communities/post/:postID", async (req, res) => {
+    try {
+        const postID = req.params.postID;
+        const community = await Community.findOne({ postIDs: postID });
+        res.status(200).json(community);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching community", error: error.message });
+    }
+});
+
+// fetches and returns all posts
 app.get('/posts', async (req, res) => {
     try {
         const posts = await Post.find();
@@ -197,6 +226,7 @@ app.get('/posts', async (req, res) => {
     }
 });
 
+// fetches and returns a specific post
 app.get('/posts/:postID', async (req, res) => {
     try {
         const postID = req.params.postID;
@@ -208,6 +238,7 @@ app.get('/posts/:postID', async (req, res) => {
     }
 });
 
+// increments the view count of a specific post
 app.post('/posts/:postID/views', async (req, res) => {
     try {
         const { postID } = req.params;
@@ -221,6 +252,38 @@ app.post('/posts/:postID/views', async (req, res) => {
     }
 });
 
+app.post('/posts/:postID/upvotes', async (req, res) => {
+    try {
+        const { postID } = req.params;
+        const { amount } = req.body;
+
+        const post = await Post.findById(postID);
+
+        const user = await User.findOne({ displayName: post.postedBy });
+
+        if (amount > 0) {
+            user.reputation += 5;
+        } 
+        else if (amount < 0) {
+            user.reputation -= 10;
+        }
+
+        await user.save();
+
+        const updatedPost = await Post.findByIdAndUpdate(
+            postID,
+            { $inc: { upvotes: amount } },
+            { new: true }
+        );
+
+        res.status(200).send(updatedPost);
+    } 
+    catch (error) {
+        res.status(500).send({ message: 'Error incrementing upvotes' });
+    }
+});
+
+// fetches and returns all posts matching a search query
 app.get('/posts/search/:searchQuery', async (req, res) => {
     try {
         const searchQuery = req.params.searchQuery;
@@ -239,6 +302,7 @@ app.get('/posts/search/:searchQuery', async (req, res) => {
     }
 }) 
 
+// fetches and returns the post that a specific comment was made under
 app.get('/posts/comment/:commentID', async (req, res) => {
     try {
         const commentID = req.params.commentID;
@@ -250,7 +314,7 @@ app.get('/posts/comment/:commentID', async (req, res) => {
     }
 })
 
-
+// fetches and returns all link flairs
 app.get('/linkflairs', async (req, res) => {
     try {
         const linkflairs = await LinkFlair.find();
@@ -261,6 +325,7 @@ app.get('/linkflairs', async (req, res) => {
     }
 });
 
+// fetches and returns a specific link flair
 app.get("/linkflairs/:linkFlairID", async (req, res) => {
     try {
         const linkFlairID = req.params.linkFlairID;
@@ -271,6 +336,7 @@ app.get("/linkflairs/:linkFlairID", async (req, res) => {
     }
 });
 
+// fetches and returns all comments
 app.get('/comments', async (req, res) => {
     try {
         const comments = await Comment.find();
@@ -281,6 +347,7 @@ app.get('/comments', async (req, res) => {
     }
 });
 
+// fetches and returns a specific comment
 app.get('/comments/:commentID', async (req, res) => {
     try {
         const comment = await Comment.findById(req.params.commentID);
@@ -291,6 +358,38 @@ app.get('/comments/:commentID', async (req, res) => {
     }
 })
 
+app.post("/comments/:commentID/votes", async (req, res) => {
+    const { commentID } = req.params;
+    const { amount } = req.body;
+
+    try {
+        // find the comment
+        const comment = await Comment.findById(commentID);
+
+        // find the user who posted the comment
+        const user = await User.findOne({ displayName: comment.commentedBy });
+
+        // adjust the user's reputation based on upvote or downvote
+        if (amount > 0) {
+            user.reputation += 5;
+        } else if (amount < 0) {
+            user.reputation -= 10;
+        }
+        await user.save();
+
+        const updatedComment = await Comment.findByIdAndUpdate(
+            commentID,
+            { $inc: { upvotes: amount } },
+            { new: true }
+        );
+
+        res.status(200).json(updatedComment);
+    } catch (error) {
+        console.error("Error updating votes:", error);
+    }
+});
+
+// fetches and returns all comments that have the search query
 app.get('/comments/search/:searchQuery', async (req, res) => {
     try {
         const searchQuery = req.params.searchQuery;
@@ -307,6 +406,7 @@ app.get('/comments/search/:searchQuery', async (req, res) => {
     }
 })
 
+// fetches and returns the parent comment of a specific comment
 app.get('/comments/parent/:commentID', async (req, res) => {
     try {
         const commentID = req.params.commentID;

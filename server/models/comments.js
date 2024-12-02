@@ -21,6 +21,10 @@ const commentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  upvotes: {
+    type: Number,
+    default: 0
+  }
 });
 
 commentSchema.virtual("url").get(function () {
