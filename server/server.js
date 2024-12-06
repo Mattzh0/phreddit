@@ -336,11 +336,35 @@ app.get('/posts/search/:searchQuery', async (req, res) => {
     }
 }) 
 
+// fetches and returns all of the posts created by a user
+app.get('/posts/user/:displayName', async (req, res) => {
+    try {
+        const displayName = req.params.displayName;
+        const posts = await Post.find({ postedBy: displayName });
+        res.status(200).json(posts);
+    }
+    catch(error) {
+        res.status(500).json({ message: "Error fetching user posts", error: error.message });
+    }
+});
+
+// fetches and returns all of the comments created by a user
+app.get('/comments/user/:displayName', async (req, res) => {
+    try {
+        const displayName = req.params.displayName;
+        const comments = await Comment.find({ commentedBy: displayName });
+        res.status(200).json(comments);
+    }
+    catch(error) {
+        res.status(500).json({ message: "Error fetching user comments", error: error.message });
+    }
+});
+
 // fetches and returns the post that a specific comment was made under
 app.get('/posts/comment/:commentID', async (req, res) => {
     try {
         const commentID = req.params.commentID;
-        const postWithComment = await Post.find({commentIDs: commentID})
+        const postWithComment = await Post.findOne({commentIDs: commentID})
         res.status(200).json(postWithComment);
     }
     catch {
@@ -526,5 +550,43 @@ app.post('/comments/new', async (req, res) => {
         res.status(500).json({message: "Error saving new comment", error: error.message});
     }
 });
+
+// Update a previously posted comment
+app.put('/comments/edit/:commentID', async (req, res) => {
+    const { content } = req.body;
+    const commentID = req.params.commentID;
+
+    try {
+        const updatedComment = await Comment.findByIdAndUpdate(
+            commentID,
+            { content },
+            { new: true }
+        );
+
+        res.status(201).json(updatedComment);
+    }
+    catch (error) {
+        res.status(500).json({message: "Error updating comment", error: error.message});
+    }
+})
+
+// Update a previously posted post
+app.put('/posts/edit/:postID', async (req, res) => {
+    const { title, content, linkFlairID, postedBy, postedDate, commentIDs, communityID } = req.body;
+    const postID = req.params.postID;
+
+    try {
+        const updatedPost = await Post.findByIdAndUpdate(
+            postID,
+            { title, content, linkFlairID, postedBy, postedDate, commentIDs },
+            { new: true }
+        );
+
+        res.status(201).json(updatedPost);
+    }
+    catch (error) {
+        res.status(500).json({message: "Error updating post", error: error.message});
+    }
+})
 
 app.listen(port, () => {console.log("Server listening on port 8000...");});

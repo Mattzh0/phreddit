@@ -116,7 +116,7 @@ export default function Postpage({ displayPage, post, isLoggedIn, displayName })
                     <div className="post-comments">{comments && getComments(post, comments)} comments</div>
                     <div className="post-upvotes">{postUpvotes} upvotes</div>
                 </div>
-                {isLoggedIn && <button className="comment-button" onClick={() => displayPage('newcomment', null, post)}>Add a comment</button>}
+                {isLoggedIn && <button className="comment-button" onClick={() => displayPage('newcomment', null, post, null, false, null)}>Add a comment</button>}
                 {isLoggedIn && 
                   <div className='post-vote-buttons'>
                     <button onClick={() => updateVotes('upvote')}>Upvote</button>

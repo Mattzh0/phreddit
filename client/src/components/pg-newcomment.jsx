@@ -1,8 +1,14 @@
 import axios from 'axios'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function Newcomment({ displayPage, replyingTo, post, displayName }) {
+export default function Newcomment({ displayPage, replyingTo, post, displayName, isEditing, comment }) {
     const [commentContent, setCommentContent] = useState('');
+
+    useEffect(() => {
+        if (isEditing) {
+            setCommentContent(comment.content);
+        }
+    }, [comment, isEditing])
 
     const handleSubmission = async (event) => {
         event.preventDefault();
@@ -35,8 +41,47 @@ export default function Newcomment({ displayPage, replyingTo, post, displayName 
         setCommentContent('');
     }
 
+    const handleEditSubmission = async (event) => {
+        event.preventDefault();
+
+        if (commentContent.length === 0) {
+            alert('Comment content is required.');
+            return
+        }
+
+
+        try {
+            await axios.put(`http://localhost:8000/comments/edit/${comment._id}`, { content: commentContent});
+        }
+        catch(error) {
+            console.error("Error editing comment", error)
+        }
+
+        const updatedPost = await axios.get(`http://localhost:8000/posts/${post._id}`);
+        
+        displayPage('post', null, updatedPost.data);
+
+        setCommentContent('');
+    }
+
     return (
-        <div className="new-comment">
+        isEditing ? (<div className="new-comment">
+            <form className="comment-form" onSubmit={handleEditSubmission}>
+                <h1>Edit Comment</h1>
+                <div>
+                    <input 
+                        value={commentContent}
+                        type="text" 
+                        id="comment-content" 
+                        maxLength="500" 
+                        placeholder="Comment Content (max 500 characters / REQUIRED)"
+                        onChange={(e) => setCommentContent(e.target.value)}
+                    />
+                </div>
+                <button type="submit" onClick={handleEditSubmission}>Resubmit Comment</button>
+            </form>
+        </div>)
+        : (<div className="new-comment">
             <form className="comment-form" onSubmit={handleSubmission}>
                 <h1>Create New Comment</h1>
                 <div>
@@ -50,6 +95,6 @@ export default function Newcomment({ displayPage, replyingTo, post, displayName 
                 </div>
                 <button type="submit" onClick={handleSubmission}>Submit Comment</button>
             </form>
-        </div>
+        </div>)
     );
 }
