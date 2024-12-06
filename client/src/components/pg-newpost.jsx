@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-export default function Newpost({ displayPage, displayName }) {
+export default function Newpost({ displayPage, displayName, isEditing, post }) {
   const [communities, setCommunities] = useState([]);
   const [flairs, setFlairs] = useState([]);
 
@@ -13,6 +13,14 @@ export default function Newpost({ displayPage, displayName }) {
   const [postContent, setPostContent] = useState('');
 
   let linkFlairID = null;
+
+  useEffect(() => {
+    if (isEditing) {
+      setPostTitle(post.title);
+      setPostContent(post.content);
+      setSelectedFlairID(post.linkFlairID);
+    }
+  }, [post])
 
   useEffect(() => {
     const fetchCommunities = async () => {
@@ -128,8 +136,126 @@ export default function Newpost({ displayPage, displayName }) {
     clearForm();
   };
 
+  const handleEditSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!communityID) {
+      alert("Community selection is required.");
+      return;
+    }
+    if (postTitle.length === 0) {
+      alert("Post title is required.");
+      return;
+    }
+    if (postContent.length === 0) {
+      alert("Post content is required.");
+      return;
+    }
+    if (selectedFlairID && newLinkFlair) {
+      alert("Please choose only one link flair.");
+      setSelectedFlairID('');
+      setNewLinkFlair('');
+      return;
+    }
+
+    linkFlairID = selectedFlairID ? selectedFlairID: null;
+
+    if (newLinkFlair) {
+        try {
+          const newFlair = {
+            content: newLinkFlair
+          }
+          const response = await axios.post('http://localhost:8000/linkflairs/new', newFlair);
+          linkFlairID = response.data._id;
+        }
+        catch (error) {
+          console.error("Error creating community", error);
+        }
+    }
+
+    const editedPost = {
+      title: postTitle,
+      content: postContent,
+      linkFlairID: linkFlairID,
+      postedBy: displayName,
+      postedDate: post.postedDate,
+      commentIDs: post.commentIDs, 
+      communityID: communityID
+    };
+
+    try {
+      const response = await axios.put(`http://localhost:8000/posts/edit/${post._id}`, editedPost);
+    }
+    catch (error) {
+      console.error("Error creating post", error);
+    }
+
+    displayPage('home');
+
+    clearForm();
+  };
+
   return (
-    <div className="new-post">
+    isEditing ? (<div className="new-post">
+        <form className="post-form" onSubmit={handleEditSubmit}>
+          <h1>Edit Post</h1>
+          <div>
+            <select 
+              className="community-select"
+              value={communityID}
+              onChange={(e) => setCommunityID(e.target.value)}
+              >
+                <option value="">Select a community (REQUIRED)</option>
+                {communities.map(community => 
+                  <option key={community._id} value={community._id}>{community.name}</option>
+                )}
+            </select>
+          </div>
+          <div>
+              <input 
+                type="text" 
+                id="post-title" 
+                maxLength="100" 
+                placeholder="Post title (max 100 characters / REQUIRED)" 
+                value={postTitle}
+                onChange={(e) => setPostTitle(e.target.value)}
+              />
+          </div>
+          <div>
+            <select 
+              className="link-flair-select"
+              value={selectedFlairID}
+              onChange={(e) => setSelectedFlairID(e.target.value)}
+            >
+                <option value="">Select flair (OPTIONAL)</option>
+                {flairs.map(flair =>
+                  <option key={flair._id} value={flair._id}>{flair.content}</option>
+                )}
+            </select>
+          </div>
+          <div>
+              <input 
+                type="text" 
+                id="new-link-flair" 
+                maxLength="30" 
+                placeholder="Or create new flair (max 30 char / Optional)" 
+                value={newLinkFlair}
+                onChange={(e) => setNewLinkFlair(e.target.value)}
+              />
+          </div>
+          <div>
+              <input 
+                type="text" 
+                id="post-content" 
+                placeholder="Post content (REQUIRED)" 
+                value={postContent}
+                onChange={(e) => setPostContent(e.target.value)}
+              />
+          </div>
+          <button type="submit">Submit Post</button>
+        </form>
+      </div>) :
+      (<div className="new-post">
         <form className="post-form" onSubmit={handleSubmit}>
           <h1>Create New Post</h1>
           <div>
@@ -187,6 +313,6 @@ export default function Newpost({ displayPage, displayName }) {
           </div>
           <button type="submit">Submit Post</button>
         </form>
-      </div>
+      </div>)
   )
 }

@@ -15,6 +15,7 @@ import Postpage from './components/pg-post.jsx';
 import Newcommunity from './components/pg-newcommunity.jsx';
 import Newpost from './components/pg-newpost.jsx';
 import Newcomment from './components/pg-newcomment.jsx';
+import Userprofile from './components/pg-userprofile.jsx';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -25,6 +26,8 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [curPost, setCurPost] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [comment, setComment] = useState(null);
 
   // update login status from the server
   const updateLoginStatus = async () => {
@@ -55,11 +58,13 @@ function App() {
     }
   };
 
-  const displayPage = (page, communityID=null, post=null, replyingTo=null) => {
+  const displayPage = (page, communityID=null, post=null, replyingTo=null, isEditing=false, comment=null) => {
     setCurPage(page);
     setCurCommunityID(communityID);
     setCurPost(post);
     setReplyingTo(replyingTo);
+    setIsEditing(isEditing);
+    setComment(comment);
   };
 
   return (
@@ -75,8 +80,9 @@ function App() {
         {curPage === 'search' ? <Searchpage searchQuery={searchQuery} displayPage={displayPage} isLoggedIn={isLoggedIn} displayName={displayName}/> : null}
         {curPage === 'post' && curPost ? <Postpage displayPage={displayPage} post={curPost} isLoggedIn={isLoggedIn} displayName={displayName}/> : null} 
         {curPage === 'newcommunity' ? <Newcommunity displayPage={displayPage} displayName={displayName} /> : null} 
-        {curPage === 'newpost' ? <Newpost displayPage={displayPage} displayName={displayName} /> : null} 
-        {curPage === 'newcomment' ? <Newcomment displayPage={displayPage} replyingTo={replyingTo} post={curPost} displayName={displayName}/> : null}
+        {curPage === 'newpost' ? <Newpost displayPage={displayPage} displayName={displayName} isEditing={isEditing} post={curPost}/> : null} 
+        {curPage === 'newcomment' ? <Newcomment displayPage={displayPage} replyingTo={replyingTo} post={curPost} displayName={displayName} isEditing={isEditing} comment={comment}/> : null}
+        {curPage === 'userprofile' ? <Userprofile displayPage={displayPage} displayName={displayName}/> : null}
       </div>
     </section>
   );
