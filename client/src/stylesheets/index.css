@@ -308,12 +308,12 @@ a {
 }
 /* CSS for the navbar ends here */
 
-/* CSS for the home, community, and search pages starts here */
-.homepage, .communitypage, .searchpage {
+/* CSS for the home, community, search page, and profile pages starts here */
+.homepage, .communitypage, .searchpage, .profilepage {
   width: 100%;
 }
 
-.homepage-header, .communitypage-header, .searchpage-header {
+.homepage-header, .communitypage-header, .searchpage-header, .profile-header {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -321,7 +321,7 @@ a {
   width: 100%;
 }
 
-.homepage-header-text, .communitypage-header-text, .searchpage-header-text {
+.homepage-header-text, .communitypage-header-text, .searchpage-header-text, .profile-header-text {
   font-family: 'Roboto', Arial;
   font-size: 30px;
   font-weight: 700;
@@ -336,6 +336,16 @@ a {
   width: 80%;
   justify-content: flex-end;
   position: sticky;
+}
+
+.profilepage-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  width: 80%;
+  position: sticky;
+  padding-left: 50px;
+  padding-bottom: 20px;
 }
 
 .join-leave-community-button {
@@ -367,13 +377,13 @@ a {
   width: 90px;
 }
 
-.homepage-post-count, .communitypage-post-count, .searchpage-post-count {
+.homepage-post-count, .communitypage-post-count, .searchpage-post-count, .profile-email, .profile-memberdate-reputation {
   font-family: 'Roboto', Arial;
   font-size: 20px;
   padding: 0px 0px 15px 50px;
 }
 
-.homepage-header-delimiter, .communitypage-header-delimiter, .searchpage-header-delimiter {
+.homepage-header-delimiter, .communitypage-header-delimiter, .searchpage-header-delimiter, .profile-header-delimiter {
   width: 97%;
   border-bottom: solid;
   border-width: 1px;
@@ -615,7 +625,6 @@ a {
   gap: 15px;
   margin-left: 50px;
 }
-
 /* CSS for profile page ends here */
 
 /* Scroll only for the main area views */
