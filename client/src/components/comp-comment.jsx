@@ -11,7 +11,6 @@ export default function Comment({ displayPage, commentID, level, post, isLoggedI
             try {
                 const response = await axios.get(`http://localhost:8000/comments/${commentID}`);
                 setComment(response.data);
-                setCommentUpvotes(response.data.upvotes);
             }
             catch(error) {
                 console.error("Error fetching comment:", error);
@@ -21,7 +20,7 @@ export default function Comment({ displayPage, commentID, level, post, isLoggedI
     }, [commentID]);
 
     if (!comment) {
-        return <div>Loading...</div>;
+        return null;
     }
 
     const replies = comment.commentIDs.map((replyID) => {

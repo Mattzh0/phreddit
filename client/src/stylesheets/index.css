@@ -608,6 +608,16 @@ a {
 }
 /* CSS for the new comment page ends here */
 
+/* CSS for profile page starts here */
+.profilepage-listing {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-left: 50px;
+}
+
+/* CSS for profile page ends here */
+
 /* Scroll only for the main area views */
 
 .main-container {

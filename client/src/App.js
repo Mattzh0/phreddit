@@ -22,6 +22,13 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [curPost, setCurPost] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null);
+<<<<<<< Updated upstream
+=======
+  const [isEditing, setIsEditing] = useState(false);
+  const [editCommunity, setEditCommunity] = useState(null);
+  const [comment, setComment] = useState(null);
+  const [adminViewingName, setAdminViewingName] = useState(null);
+>>>>>>> Stashed changes
 
   // update login status from the server
   const updateLoginStatus = async () => {
@@ -52,11 +59,22 @@ function App() {
     }
   };
 
+<<<<<<< Updated upstream
   const displayPage = (page, communityID=null, post=null, replyingTo=null) => {
+=======
+  const displayPage = (page, communityID=null, post=null, replyingTo=null, isEditing=false, editCommunity=null, comment=null, adminViewName=null) => {
+>>>>>>> Stashed changes
     setCurPage(page);
     setCurCommunityID(communityID);
     setCurPost(post);
     setReplyingTo(replyingTo);
+<<<<<<< Updated upstream
+=======
+    setIsEditing(isEditing);
+    setEditCommunity(editCommunity);
+    setComment(comment);
+    setAdminViewingName(adminViewName)
+>>>>>>> Stashed changes
   };
 
   return (
@@ -71,6 +89,13 @@ function App() {
         {curPage === 'community' && curCommunityID ? <Communitypage displayPage={displayPage} communityID={curCommunityID} isLoggedIn={isLoggedIn} displayName={displayName}/> : null}
         {curPage === 'search' ? <Searchpage searchQuery={searchQuery} displayPage={displayPage} isLoggedIn={isLoggedIn} displayName={displayName}/> : null}
         {curPage === 'post' && curPost ? <Postpage displayPage={displayPage} post={curPost} isLoggedIn={isLoggedIn} displayName={displayName}/> : null} 
+<<<<<<< Updated upstream
+=======
+        {curPage === 'newcommunity' ? <Newcommunity displayPage={displayPage} displayName={displayName} isEditing={isEditing} editCommunity={editCommunity}/> : null} 
+        {curPage === 'newpost' ? <Newpost displayPage={displayPage} displayName={displayName} isEditing={isEditing} post={curPost}/> : null} 
+        {curPage === 'newcomment' ? <Newcomment displayPage={displayPage} replyingTo={replyingTo} post={curPost} displayName={displayName} isEditing={isEditing} comment={comment}/> : null}
+        {curPage === 'userprofile' ? <Userprofile displayPage={displayPage} displayName={displayName} adminViewingName={adminViewingName}/> : null}
+>>>>>>> Stashed changes
       </div>
     </section>
   );
