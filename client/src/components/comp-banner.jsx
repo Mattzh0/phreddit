@@ -43,7 +43,7 @@ export default function Banner({ setSearchQuery, displayPage, curPage, setCurCom
                 )}
                 {isLoggedIn && <button id="profile-button-user" onClick={() => {
                     setCurCommunityID(null);
-                    displayPage('userprofile');
+                    displayPage('userprofile', displayName);
                 }}>{displayName}</button>}
             </div>
         </div>

@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 export function displayPosts(posts, displayPage) {
-    return posts.map(post => <Post key={post._id} post={post} displayPage={displayPage}/>)
+  return posts
+      .filter(post => post !== null && post !== undefined) // filter out null/undefined posts
+      .map(post => <Post key={post._id} post={post} displayPage={displayPage} />);
 };
 
 export default function Homepage({ displayPage, isLoggedIn, displayName }) {

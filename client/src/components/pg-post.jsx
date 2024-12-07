@@ -11,7 +11,6 @@ export default function Postpage({ displayPage, post, isLoggedIn, displayName })
     const [postViews, setPostViews] = useState(post.views);
     const [postUpvotes, setPostUpvotes] = useState(null);
 
-    console.log(displayName);
     useEffect(() => {
         const fetchCommunity = async () => {
             try {

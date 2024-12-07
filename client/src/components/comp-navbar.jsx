@@ -28,7 +28,7 @@ export default function Navbar({displayPage, curPage, curCommunityID, setCurComm
           }
       };
       fetchCommunities();
-    }, [curCommunityID, displayName]);
+    }, [curCommunityID, displayName, curPage]);
 
     const handleCommunityClick = (communityID) => {
       setCurCommunityID(communityID);
