@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 export default function Userprofile({ displayPage, displayName, adminViewingName }) {
     const [user, setUser] = useState(displayName);
     const [listing, setListing] = useState('communities');
@@ -67,54 +67,58 @@ export default function Userprofile({ displayPage, displayName, adminViewingName
         fetchCommunities();
         fetchPosts();
         fetchComments();
-    }, [user]);
-    const getPostOfComment = async (comment) => {
-        try {
-            if (!comment || !comment._id) {
-                console.error("Invalid comment:", comment);
+    }, [user, displayName]);
+
+    const getPostOfComment = useCallback(
+        async (comment) => {
+            try {
+                if (!comment || !comment._id) {
+                    console.error("Invalid comment:", comment);
+                    return null;
+                }
+    
+                const postResponse = await axios.get(`http://localhost:8000/posts/comment/${comment._id}`);
+                if (postResponse.data !== null) {
+                    return postResponse.data;
+                }
+    
+                const parentCommentResponse = await axios.get(`http://localhost:8000/comments/parent/${comment._id}`);
+                if (parentCommentResponse.data && parentCommentResponse.data.length > 0) {
+                    return await getPostOfComment(parentCommentResponse.data[0]);
+                }
+    
                 return null;
+            } catch (error) {
+                console.error("Error fetching post", error);
             }
+        },
+        []
+    );
     
-            const postResponse = await axios.get(`http://localhost:8000/posts/comment/${comment._id}`)
-            if (postResponse.data !== null) {
-                return postResponse.data;
-            }
-    
-            const parentCommentResponse = await axios.get(`http://localhost:8000/comments/parent/${comment._id}`)
-            if (parentCommentResponse.data && parentCommentResponse.data.length > 0) {
-                return await getPostOfComment(parentCommentResponse.data[0]);
-            }
-            
-            return null;
-        }
-        catch(error) {
-            console.error("Error fetching post", error);
-        }
-    }
     useEffect(() => {
         const fetchCommentPosts = async () => {
             try {
                 const postsAndComments = await Promise.all(
-                    comments.map(async comment => {
+                    comments.map(async (comment) => {
                         const post = await getPostOfComment(comment);
                         return [comment, post];
                     })
-                )
+                );
                 setPostsAndComments(postsAndComments);
+            } catch (error) {
+                console.error("Error fetching posts:", error);
             }
-            catch (error) {
-                console.error("Error fetching posts:", error)
-            }
-        }
+        };
         fetchCommentPosts();
-    }, [comments])
+    }, [comments, getPostOfComment]);
+
     const renderListing = () => {
         if (listing === 'communities') {
             return (
                 communities.map(community => (
                     <a
                     key={community._id}
-                    href="#"
+                    href="/#"
                     onClick={() => {displayPage('newcommunity', null, null, null, true, community, null)}}>
                     <div>r/{community.name}</div>
                     </a>
@@ -126,7 +130,7 @@ export default function Userprofile({ displayPage, displayName, adminViewingName
                 posts.map(post => (
                     <a
                     key={post._id}
-                    href="#"
+                    href="/#"
                     onClick={() => displayPage('newpost', null, post, null, true)}>
                     <div>{post.title}</div>
                     </a>
@@ -138,7 +142,7 @@ export default function Userprofile({ displayPage, displayName, adminViewingName
             return postsAndComments.map(postAndComment => (
                 <a
                 key={postAndComment[0]._id}
-                href="#">
+                href="/#">
                     <div onClick={() => displayPage('newcomment', null, postAndComment[1], null, true, null, postAndComment[0])}>
                         <div>{postAndComment[1].title}</div>
                         <div>{postAndComment[0].content.length > 20 ? postAndComment[0].content.substring(0, 20) : postAndComment[0].content}</div>
@@ -150,7 +154,7 @@ export default function Userprofile({ displayPage, displayName, adminViewingName
             return users.map(user => (
                 <a 
                 key={user._id}
-                href = "#"
+                href = "/#"
                 onClick={() => {
                     displayPage('userprofile', null, null, null, false, null, null, user.displayName);
                     setListing('communities');
@@ -172,8 +176,6 @@ export default function Userprofile({ displayPage, displayName, adminViewingName
             const response = await axios.delete(`http://localhost:8000/users/${user._id}`);
             alert(response.data.message);
             displayPage('home');
-            // displayPage('userprofile', null, null, null, false, null, null, displayName);
-            // setListing('communities');
             
         } catch (error) {
             console.error("Error deleting user:", error);

@@ -83,7 +83,7 @@ export default function Post({ post, displayPage, showCommunity=true }) {
   const flairHTML = flair ? <div className="homepage-post-flair">{flair.content}</div> : null;
 
   return (
-      <a href="#" className="homepage-post-link" onClick={() => {
+      <a href="/#" className="homepage-post-link" onClick={() => {
           incrementViewCount();
           return displayPage('post', null, post);
       }}>

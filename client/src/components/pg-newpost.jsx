@@ -113,7 +113,7 @@ export default function Newpost({ displayPage, displayName, isEditing, post }) {
       };
   
       try {
-        const response = await axios.post('http://localhost:8000/posts/new', newPost);
+        await axios.post('http://localhost:8000/posts/new', newPost);
       }
       catch (error) {
         console.error("Error creating post", error);
@@ -127,7 +127,7 @@ export default function Newpost({ displayPage, displayName, isEditing, post }) {
       };
   
       try {
-        const response = await axios.put(`http://localhost:8000/posts/edit/${post._id}`, editedPost);
+        await axios.put(`http://localhost:8000/posts/edit/${post._id}`, editedPost);
       }
       catch (error) {
         console.error("Error creating post", error);
