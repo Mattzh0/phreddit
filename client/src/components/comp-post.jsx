@@ -23,7 +23,7 @@ export function getComments(post, comments) {
     };
   
     return count(post.commentIDs);
-  }
+}
 
 export default function Post({ post, displayPage, showCommunity=true }) {
     const [communities, setCommunities] = useState([]);

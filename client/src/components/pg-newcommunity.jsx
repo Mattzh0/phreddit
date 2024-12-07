@@ -1,20 +1,16 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-
 export default function Newcommunity({ displayPage, displayName, isEditing, editCommunity }) {
   const [communityName, setCommunityName] = useState('');
   const [communityDesc, setCommunityDesc] = useState('');
-
   useEffect(() => {
     if (isEditing && editCommunity) {
       setCommunityName(editCommunity.name || '');
       setCommunityDesc(editCommunity.description || '');
     }
   }, [isEditing, editCommunity])
-
   const handleSubmission = async (event) => {
     event.preventDefault();
-
     if (communityName.length === 0) {
       alert('Community name is required.');
       return
@@ -28,12 +24,10 @@ export default function Newcommunity({ displayPage, displayName, isEditing, edit
       const response = await axios.get(`http://localhost:8000/communities/exists/${communityName}`);
       return response.data;
     }
-
     if (await communityNameExists()) {
       alert('Community name taken.');
       return
     }
-
     if (!isEditing) {
       const newCommunity = {
         name: communityName,
@@ -63,7 +57,6 @@ export default function Newcommunity({ displayPage, displayName, isEditing, edit
           description: communityDesc
         });
         const updatedCommunity = response.data;
-
         displayPage('community', updatedCommunity._id);
         setCommunityName('');
         setCommunityDesc('');
@@ -73,13 +66,11 @@ export default function Newcommunity({ displayPage, displayName, isEditing, edit
       }
     }
   }
-
   const handleDeleteCommunity = async () => {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete the community "${editCommunity?.name}"? This action cannot be undone.`
     );
     if (!confirmDelete) return;
-
     try {
       await axios.delete(`http://localhost:8000/communities/${editCommunity._id}`);
       alert(`Community "${editCommunity?.name}" has been deleted.`);
@@ -89,7 +80,6 @@ export default function Newcommunity({ displayPage, displayName, isEditing, edit
       alert('Failed to delete the community. Please try again.');
     }
   };
-
   return(
     <div className="new-community">
       <form className="community-form" onSubmit={handleSubmission}>

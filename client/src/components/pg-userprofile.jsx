@@ -1,16 +1,13 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-
 export default function Userprofile({ displayPage, displayName, adminViewingName }) {
     const [user, setUser] = useState(displayName);
     const [listing, setListing] = useState('communities');
-
     const [users, setUsers] = useState([]);
     const [communities, setCommunities] = useState([]);
     const [posts, setPosts] = useState([]);
     const [comments, setComments] = useState([]);
     const [postsAndComments, setPostsAndComments] = useState([]);
-
     useEffect(() => {
         const fetchUser = async () => {
             try {
@@ -29,7 +26,6 @@ export default function Userprofile({ displayPage, displayName, adminViewingName
         }
         fetchUser();
     }, [displayPage, displayName, adminViewingName]);
-
     useEffect(() => {
         const fetchCommunities = async () => {
             try {
@@ -41,7 +37,6 @@ export default function Userprofile({ displayPage, displayName, adminViewingName
                 console.error("Error fetching communities:", error);
             }
         }
-
         const fetchPosts = async () => {
             try {
                 const postsResponse = await axios.get(`http://localhost:8000/posts/user/${user.displayName}`);
@@ -52,7 +47,6 @@ export default function Userprofile({ displayPage, displayName, adminViewingName
                 console.error("Error fetching posts:", error);
             }
         }
-
         const fetchComments = async () => {
             try {
                 const commentsResponse = await axios.get(`http://localhost:8000/comments/user/${user.displayName}`);
@@ -63,7 +57,6 @@ export default function Userprofile({ displayPage, displayName, adminViewingName
                 console.error("Error fetching comments:", error);
             }
         }
-
         if (displayName === 'PhredditAdmin') {
             const fetchUsers = async () => {
                 const response = await axios.get('http://localhost:8000/users')
@@ -71,13 +64,10 @@ export default function Userprofile({ displayPage, displayName, adminViewingName
             }
             fetchUsers();
         }
-
         fetchCommunities();
         fetchPosts();
         fetchComments();
-
     }, [user]);
-
     const getPostOfComment = async (comment) => {
         try {
             if (!comment || !comment._id) {
@@ -101,7 +91,6 @@ export default function Userprofile({ displayPage, displayName, adminViewingName
             console.error("Error fetching post", error);
         }
     }
-
     useEffect(() => {
         const fetchCommentPosts = async () => {
             try {
@@ -118,9 +107,7 @@ export default function Userprofile({ displayPage, displayName, adminViewingName
             }
         }
         fetchCommentPosts();
-
     }, [comments])
-
     const renderListing = () => {
         if (listing === 'communities') {
             return (
@@ -175,7 +162,6 @@ export default function Userprofile({ displayPage, displayName, adminViewingName
             ))
         }
     }
-
     const handleDeleteUser = async () => {
         const confirmDelete = window.confirm(
             `Are you sure you want to delete this user? This action cannot be undone.`
@@ -194,7 +180,6 @@ export default function Userprofile({ displayPage, displayName, adminViewingName
             alert("An error occurred while deleting the user.");
         }
     };
-
     return (
         <section className='main-container'>
             <div className="profilepage">

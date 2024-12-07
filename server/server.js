@@ -91,7 +91,7 @@ app.post('/users/login', async (req, res) => {
         // compare the password with the hashed password
         const isPasswordCorrect = await bcrypt.compare(password, user.password);
         if (!isPasswordCorrect) {
-            return res.status(400).json({ message: "Email or password is incorreccleart." });
+            return res.status(400).json({ message: "Email or password is incorrect." });
         }
 
         // if credentials are correct, store user info in the session
@@ -184,57 +184,45 @@ app.get("/communities/:communityID", async (req, res) => {
 app.put('/communities/edit/:communityID', async (req, res) => {
     const { name, description } = req.body;
     const communityID = req.params.communityID;
-
     try {
         const updatedCommunity = await Community.findByIdAndUpdate(
             communityID,
             { name, description },
             { new: true }
         );
-
         res.status(200).json(updatedCommunity);
     }
     catch (error) {
         res.status(500).json({ message: "Error editing community", error: error.message });
     }
 });
-
 // deletes a community along with its posts and comments
 app.delete('/communities/:communityID', async (req, res) => {
     try {
         const { communityID } = req.params;
-
         // recursive function to delete a comment and its replies
         const deleteCommentAndReplies = async (commentID) => {
             // 
             const comment = await Comment.findById(commentID);
-
             if (!comment) return; // skip if the comment doesn't exist
-
             // recursively delete each child comment
             for (const childCommentID of comment.commentIDs) {
                 await deleteCommentAndReplies(childCommentID);
             }
-
             // delete the current comment
             await Comment.findByIdAndDelete(commentID);
         };
-
         // fetch the community to get its related posts
         const community = await Community.findById(communityID);
-
         if (!community) {
             return res.status(404).json({ message: "Community not found." });
         }
-
         const postIDs = community.postIDs;
-
         // delete all comments associated with the posts in the community
         if (postIDs && postIDs.length > 0) {
             for (const postID of postIDs) {
                 // fetch the post to access its commentIDs
                 const post = await Post.findById(postID);
-
                 if (post && post.commentIDs.length > 0) {
                     // recursively delete each root comment
                     for (const commentID of post.commentIDs) {
@@ -243,13 +231,10 @@ app.delete('/communities/:communityID', async (req, res) => {
                 }
             }
         }
-
         // delete all posts associated with the community
         await Post.deleteMany({ _id: { $in: postIDs } });
-
         // delete the community itself
         await Community.findByIdAndDelete(communityID);
-
         res.status(200).json({ message: "Community and all associated data deleted successfully." });
     } catch (error) {
         console.error("Error deleting community:", error);
@@ -270,6 +255,40 @@ app.post("/communities/leave", async (req, res) => {
     }
     catch(error) {
         res.status(500).json({ message: "Error removing member from community", error: error.message });
+    }
+});
+
+// creates a new community
+app.post('/communities/new', async (req, res) => {
+    const { name, description, postIDs, startDate, members, memberCount } = req.body;
+
+    try {
+        const newCommunity = new Community({
+            name,
+            description,
+            postIDs,
+            startDate,
+            members,
+            memberCount,
+        });
+        const savedCommunity = await newCommunity.save();
+        res.status(201).json(savedCommunity);
+    } 
+    catch (error) {
+        res.status(500).json({ message: "Error saving new community", error: error.message });
+    }
+});
+
+// checks if a community name already exists
+app.get('/communities/exists/:communityName', async (req, res) => {
+    const name = req.params.communityName;
+
+    try {
+        const exists = await Community.exists({ name });
+        res.status(200).json(exists);
+    }
+    catch(error) {
+        res.status(500).json({ message: "Name does not exist", error: error.message });
     }
 });
 
@@ -387,11 +406,35 @@ app.get('/posts/search/:searchQuery', async (req, res) => {
     }
 }) 
 
+// fetches and returns all of the posts created by a user
+app.get('/posts/user/:displayName', async (req, res) => {
+    try {
+        const displayName = req.params.displayName;
+        const posts = await Post.find({ postedBy: displayName });
+        res.status(200).json(posts);
+    }
+    catch(error) {
+        res.status(500).json({ message: "Error fetching user posts", error: error.message });
+    }
+});
+
+// fetches and returns all of the comments created by a user
+app.get('/comments/user/:displayName', async (req, res) => {
+    try {
+        const displayName = req.params.displayName;
+        const comments = await Comment.find({ commentedBy: displayName });
+        res.status(200).json(comments);
+    }
+    catch(error) {
+        res.status(500).json({ message: "Error fetching user comments", error: error.message });
+    }
+});
+
 // fetches and returns the post that a specific comment was made under
 app.get('/posts/comment/:commentID', async (req, res) => {
     try {
         const commentID = req.params.commentID;
-        const postWithComment = await Post.find({commentIDs: commentID})
+        const postWithComment = await Post.findOne({commentIDs: commentID})
         res.status(200).json(postWithComment);
     }
     catch {
@@ -503,8 +546,6 @@ app.get('/comments/parent/:commentID', async (req, res) => {
     }
 })
 
-<<<<<<< Updated upstream
-=======
 app.post('/posts/new', async (req, res) => {
     const { title, content, linkFlairID, postedBy, postedDate, commentIDs, views, communityID } = req.body;
     try {
@@ -517,19 +558,16 @@ app.post('/posts/new', async (req, res) => {
             commentIDs,
             views
         })
-
         const savedPost = await newPost.save();
         const community = await Community.findById(communityID);
         community.postIDs.push(savedPost._id);
         await community.save();
-
         res.status(201).json(savedPost);
     }
     catch (error) {
         res.status(500).json({message: "Error saving new post", error: error.message});
     }
 });
-
 app.post('/linkflairs/new', async (req, res) => {
     const { content } = req.body;
     try {
@@ -543,20 +581,16 @@ app.post('/linkflairs/new', async (req, res) => {
         res.status(500).json({message: "Error saving new new link flair", error: error.message});
     }
 });
-
 app.post('/comments/new', async (req, res) => {
     const { content, commentIDs, commentedBy, commentedDate, postID, replyingToID } = req.body;
     try {
-
         const newComment = new Comment({
             content,
             commentIDs,
             commentedBy,
             commentedDate
         });
-
         const savedComment = await newComment.save();
-
         if (replyingToID) {
             const replyingTo = await Comment.findById(replyingToID);
             replyingTo.commentIDs.push(savedComment._id);
@@ -572,83 +606,67 @@ app.post('/comments/new', async (req, res) => {
                 console.error("Error creating comment", error);
             }
         }
-
         res.status(201).json(savedComment);
     }
     catch(error) {
         res.status(500).json({message: "Error saving new comment", error: error.message});
     }
 });
-
 // Update a previously posted comment
 app.put('/comments/edit/:commentID', async (req, res) => {
     const { content } = req.body;
     const commentID = req.params.commentID;
-
     try {
         const updatedComment = await Comment.findByIdAndUpdate(
             commentID,
             { content },
             { new: true }
         );
-
         res.status(201).json(updatedComment);
     }
     catch (error) {
         res.status(500).json({message: "Error updating comment", error: error.message});
     }
 })
-
 // Update a previously posted post
 app.put('/posts/edit/:postID', async (req, res) => { 
     const { title, content, linkFlairID } = req.body;
     const postID = req.params.postID;
-
     try {
         const updatedPost = await Post.findByIdAndUpdate(
             postID,
             { title, content, linkFlairID },
             { new: true }
         );
-
         if (!updatedPost) {
             return res.status(404).json({ message: "Post not found" });
         }
-
         res.status(200).json(updatedPost);
     }
     catch (error) {
         res.status(500).json({ message: "Error updating post", error: error.message });
     }
 });
-
 // delete a post along with its comments and replies
 app.delete('/posts/delete/:id', async (req, res) => {
     try {
         const postId = req.params.id;
-
         // recursive function to delete a comment and its replies
         const deleteCommentAndReplies = async (commentID) => {
             const comment = await Comment.findById(commentID);
-
             if (!comment) return; // skip if the comment doesn't exist
-
             // recursively delete each child comment
             for (const childCommentID of comment.commentIDs) {
                 await deleteCommentAndReplies(childCommentID);
             }
-
             // delete the current comment
             await Comment.findByIdAndDelete(commentID);
         };
-
         // fetch the post to get its commentIDs
         const post = await Post.findById(postId);
-
         if (!post) {
             return res.status(404).json({ message: "Post not found." });
         }
-
         // delete all comments associated with the post
         if (post.commentIDs && post.commentIDs.length > 0) {
             for (const commentID of post.commentIDs) {
@@ -656,32 +674,25 @@ app.delete('/posts/delete/:id', async (req, res) => {
                 await deleteCommentAndReplies(commentID);
             }
         }
-
         // delete the post itself
         await Post.findByIdAndDelete(postId);
-
         res.status(200).json({ message: "Post and its associated comments have been deleted successfully." });
     } catch (error) {
         console.error("Error deleting post:", error);
         res.status(500).json({ message: "Error deleting post.", error: error.message });
     }
 });
-
 // delete a comment and its replies
 app.delete('/comments/delete/:id', async (req, res) => {
     try {
         const commentID = req.params.id;
-
         const deleteCommentAndReplies = async (commentID) => {
             const comment = await Comment.findById(commentID);
-
             if (!comment) return; // skip if the comment doesn't exist
-
             // recursively delete replies
             for (const replyID of comment.commentIDs) {
                 await deleteCommentAndReplies(replyID);
             }
-
             // delete the current comment
             await Comment.findByIdAndDelete(commentID);
         };
@@ -689,10 +700,8 @@ app.delete('/comments/delete/:id', async (req, res) => {
         // delete the comment and all its replies
         const comment = await Comment.findById(commentID);
         await deleteCommentAndReplies(commentID);
-
         // check if the comment is a top-level comment (directly attached to the post)
         const post = await Post.findOne({ commentIDs: commentID });
-
         if (post) {
             // if the post is found, update its commentIDs to remove the deleted top-level comment
             await Post.updateOne(
@@ -703,21 +712,18 @@ app.delete('/comments/delete/:id', async (req, res) => {
         else {
             // if the comment is a reply, remove it from the parent comment's commentIDs
             const parentComment = await Comment.findOne({ commentIDs: commentID });
-
             // remove the deleted comment from the parent comment's commentIDs
             await Comment.updateOne(
                 { _id: parentComment._id },
                 { $pull: { commentIDs: commentID } }
             );
         }
-
         res.status(200).json({ message: "Comment and replies deleted successfully." });
     } catch (error) {
         console.error("Error deleting comment:", error);
         res.status(500).json({ message: "Error deleting comment." });
     }
 });
-
 // delete user
 app.delete('/users/:userID', async (req, res) => {
     try {
@@ -725,33 +731,26 @@ app.delete('/users/:userID', async (req, res) => {
         console.log(userID);
         const user = await User.findById(userID);
         const userDisplayName = user.displayName;
-
         // recursive function to delete a comment and its replies
         const deleteCommentAndReplies = async (commentID) => {
             const comment = await Comment.findById(commentID);
             if (!comment) return;
-
             // recursively delete each child comment
             for (const childCommentID of comment.commentIDs) {
                 await deleteCommentAndReplies(childCommentID);
             }
-
             // delete the current comment
             await Comment.findByIdAndDelete(commentID);
         };
-
         // find all communities created by the user
         const communities = await Community.find({ "members.0": userDisplayName });
-
         // delete all posts and comments associated with the communities
         for (const community of communities) {
             const postIDs = community.postIDs;
-
             // delete all comments related to the posts in this community
             if (postIDs && postIDs.length > 0) {
                 for (const postID of postIDs) {
                     const post = await Post.findById(postID);
-
                     if (post && post.commentIDs.length > 0) {
                         for (const commentID of post.commentIDs) {
                             await deleteCommentAndReplies(commentID);
@@ -759,17 +758,13 @@ app.delete('/users/:userID', async (req, res) => {
                     }
                 }
             }
-
             // delete all posts associated with the community
             await Post.deleteMany({ _id: { $in: postIDs } });
-
             // delete the community itself
             await Community.findByIdAndDelete(community._id);
         }
-
         // delete the user
         await User.findByIdAndDelete(userID);
-
         res.status(200).json({ message: "User and all associated data deleted successfully." });
     } catch (error) {
         console.error("Error deleting user:", error);
@@ -777,5 +772,4 @@ app.delete('/users/:userID', async (req, res) => {
     }
 });
 
->>>>>>> Stashed changes
 app.listen(port, () => {console.log("Server listening on port 8000...");});

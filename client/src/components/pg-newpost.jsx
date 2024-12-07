@@ -1,19 +1,14 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-
 export default function Newpost({ displayPage, displayName, isEditing, post }) {
   const [communities, setCommunities] = useState([]);
   const [flairs, setFlairs] = useState([]);
-
-
   const [communityID, setCommunityID] = useState('');
   const [postTitle, setPostTitle] = useState('');
   const [selectedFlairID, setSelectedFlairID] = useState('');
   const [newLinkFlair, setNewLinkFlair] = useState('');
   const [postContent, setPostContent] = useState('');
-
   let linkFlairID = null;
-
   useEffect(() => {
     const editPost = async () => {
       if (isEditing) {
@@ -26,7 +21,6 @@ export default function Newpost({ displayPage, displayName, isEditing, post }) {
     }
     editPost();
   }, [isEditing, post])
-
   useEffect(() => {
     const fetchCommunities = async () => {
       try {
@@ -38,14 +32,11 @@ export default function Newpost({ displayPage, displayName, isEditing, post }) {
       }
     }
     fetchCommunities();
-
   }, []);
-
   useEffect(() => {
     const sortedCommunities = communities.sort((a, b) => {
       const aCommunityMember = a.members.includes(displayName);
       const bCommunityMember = b.members.includes(displayName);
-
       if (aCommunityMember && !bCommunityMember) {
         return -1;
       }
@@ -53,11 +44,9 @@ export default function Newpost({ displayPage, displayName, isEditing, post }) {
         return 1;
       }
       return 0;
-
     });
     setCommunities(sortedCommunities);
   }, [communities, displayName])
-
   useEffect(() => {
     const fetchFlairs = async () => {
       try {
@@ -70,20 +59,16 @@ export default function Newpost({ displayPage, displayName, isEditing, post }) {
     }
     fetchFlairs();
   }, []);
-
   const clearForm = () => {
     setCommunityID('');
     setPostTitle('');
     setSelectedFlairID('');
     setNewLinkFlair('');
     setPostContent('');
-
     linkFlairID = null;
   }
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     if (!communityID) {
       alert("Community selection is required.");
       return;
@@ -102,9 +87,7 @@ export default function Newpost({ displayPage, displayName, isEditing, post }) {
       setNewLinkFlair('');
       return;
     }
-
     linkFlairID = selectedFlairID ? selectedFlairID: null;
-
     if (newLinkFlair) {
         try {
           const newFlair = {
@@ -117,7 +100,6 @@ export default function Newpost({ displayPage, displayName, isEditing, post }) {
           console.error("Error creating community", error);
         }
     }
-
     if (!isEditing) {
       const newPost = {
         title: postTitle,
@@ -151,11 +133,9 @@ export default function Newpost({ displayPage, displayName, isEditing, post }) {
         console.error("Error creating post", error);
       }
     }
-
     displayPage('home');
     clearForm();
   };
-
   const handleDeletePost = async () => {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete the post titled "${postTitle}"? This action cannot be undone.`
@@ -171,7 +151,6 @@ export default function Newpost({ displayPage, displayName, isEditing, post }) {
       alert('Failed to delete the post. Please try again.');
     }
   };
-
   return (
     <div className="new-post">
         <form className="post-form" onSubmit={handleSubmit}>
