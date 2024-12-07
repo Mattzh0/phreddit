@@ -7,7 +7,7 @@ export default function Welcome( { displayPage }) {
           <div className="welcome-button-container">
             <button onClick={() => displayPage('sign-up')} className="register-button">Register</button>
             <button onClick={() => displayPage('login')} className="login-button">Login</button>
-            <button onClick={() => displayPage()} className="guest-button">Continue as Guest</button>
+            <button onClick={() => displayPage('home')} className="guest-button">Continue as Guest</button>
           </div>
       </div>
     </div>
