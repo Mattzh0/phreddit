@@ -40,7 +40,7 @@ export default function Login( { displayPage, updateLoginStatus }) {
               />
               <label htmlFor="password">Password:</label>
               <input 
-                type="text" 
+                type="password" 
                 id="user-password" 
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -48,6 +48,7 @@ export default function Login( { displayPage, updateLoginStatus }) {
               />
               <div className="welcome-button-container">
                 <button type="submit" className="login-button">Login</button>
+                <button type="button" onClick={() => displayPage('welcome')}>Back</button>
               </div>
           </form>
       </div>

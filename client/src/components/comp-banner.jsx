@@ -14,7 +14,7 @@ export default function Banner({ setSearchQuery, displayPage, curPage, setCurCom
 
     return(
         <div className="banner"> 
-            <a href="#" className="application-name" onClick={() => {
+            <a href="/#" className="application-name" onClick={() => {
                 setCurCommunityID(null);
                 displayPage('welcome');
             }}>phreddit</a>

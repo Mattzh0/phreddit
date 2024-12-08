@@ -168,6 +168,18 @@ app.get('/communities/user/:displayName', async (req, res) => {
     }
 });
 
+// fetches and returns all communities that a given user created
+app.get('/communities/user/createdBy/:displayName', async (req, res) => {
+    try {
+        const name = req.params.displayName
+        const communities = await Community.find({"members.0": name})
+        res.status(200).json(communities);
+    }
+    catch {
+        res.status(500).json({ message: "Error fetching the user's communities", error: error.message });
+    }
+});
+
 // fetches and returns a specific community
 app.get("/communities/:communityID", async (req, res) => {
     try {
@@ -437,7 +449,7 @@ app.get('/posts/comment/:commentID', async (req, res) => {
         const postWithComment = await Post.findOne({commentIDs: commentID})
         res.status(200).json(postWithComment);
     }
-    catch {
+    catch (error) {
         res.status(500).json({ message: "Error fetching posts with the specificed comment", error: error.message });
     }
 })
@@ -481,7 +493,7 @@ app.get('/comments/:commentID', async (req, res) => {
         const comment = await Comment.findById(req.params.commentID);
         res.status(200).json(comment);
     }
-    catch {
+    catch (error) {
         res.status(500).json({ message: "Error fetching comment", error: error.message });
     }
 })
@@ -517,34 +529,125 @@ app.post("/comments/:commentID/votes", async (req, res) => {
     }
 });
 
-// fetches and returns all comments that have the search query
+// fetches and returns all comments that have the search query, including nested ones
 app.get('/comments/search/:searchQuery', async (req, res) => {
     try {
         const searchQuery = req.params.searchQuery;
-        const terms = searchQuery.split(' ')
-        
+        const terms = searchQuery.split(' ');
         const regexArray = terms.map(term => new RegExp(`\\b${term}\\b`, 'i'));
+        
+        // find all comments that match the search query
+        const searchedComments = await Comment.find({
+            content: { $in: regexArray }
+        });
 
-        const searchedComments = await Comment.find({ content: { $in: regexArray } });
+        // function to find the root post for a comment
+        async function findRootPost(commentId) {
+            // first check if this comment is directly under a post
+            const directPost = await Post.findOne({ commentIDs: commentId });
+            if (directPost) {
+                return directPost;
+            }
 
-        res.status(200).json(searchedComments);
+            // if not found, this comment is nested. Search for its parent comment
+            let currentCommentId = commentId;
+            while (true) {
+                // find a comment that has this comment in its commentIDs
+                const parentComment = await Comment.findOne({ commentIDs: currentCommentId });
+                
+                if (!parentComment) {
+                    return null; // no parent found
+                }
+
+                // check if this parent comment is directly under a post
+                const parentPost = await Post.findOne({ commentIDs: parentComment._id });
+                if (parentPost) {
+                    return parentPost;
+                }
+
+                // if not found, continue up the chain
+                currentCommentId = parentComment._id;
+            }
+        }
+
+        // for each matching comment, find its root post
+        const results = await Promise.all(
+            searchedComments.map(async (comment) => {
+                const rootPost = await findRootPost(comment._id);
+                return {
+                    comment,
+                    post: rootPost,
+                    isNestedComment: true
+                };
+            })
+        );
+
+        // filter out any results where we couldn't find the root post
+        const validResults = results.filter(result => result.post !== null);
+        
+        res.status(200).json(validResults);
+    } catch (error) {
+        console.error('Error in comment search:', error);
+        res.status(500).json({ 
+            message: "Error fetching searched comments", 
+            error: error.message 
+        });
     }
-    catch {
-        res.status(500).json({ message: "Error fetching searched comments", error: error.message });
-    }
-})
+});
 
-// fetches and returns the parent comment of a specific comment
+// fetches and returns the parent comment of a specific comment (and its nested comments)
 app.get('/comments/parent/:commentID', async (req, res) => {
     try {
         const commentID = req.params.commentID;
-        const parentComment = await Comment.find({commentIDs: commentID})
-        res.status(200).json(parentComment);
-    }
-    catch {
+        
+        // find the comment and all its nested replies
+        const findAllReplies = async (commentID) => {
+            const comment = await Comment.findById(commentID);
+            let allReplies = [comment];
+
+            // recursively find all replies for the given comment
+            for (let childID of comment.commentIDs) {
+                allReplies.push(...await findAllReplies(childID));
+            }
+
+            return allReplies;
+        };
+
+        const allReplies = await findAllReplies(commentID);
+        
+        res.status(200).json(allReplies);
+    } catch (error) {
         res.status(500).json({ message: "Error fetching the parent comment of the specified comment", error: error.message });
     }
-})
+});
+
+app.get('/comments/parentOnly/:commentID', async (req, res) => {
+    try {
+        const commentID = req.params.commentID;
+
+        // find the comment by ID
+        const comment = await Comment.findById(commentID);
+
+        // if no comment is found, return an error
+        if (!comment) {
+            return res.status(404).json({ message: "Comment not found" });
+        }
+
+        // find the parent comment by searching through all comments
+        const allComments = await Comment.find();
+        const parentComment = allComments.find(c => c.commentIDs.includes(commentID));
+
+        // if a parent is found, return it, otherwise return an error
+        if (parentComment) {
+            return res.status(200).json(parentComment);
+        } else {
+            return res.status(404).json({ message: "This comment is not a reply and has no parent." });
+        }
+
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching the parent comment", error: error.message });
+    }
+});
 
 app.post('/posts/new', async (req, res) => {
     const { title, content, linkFlairID, postedBy, postedDate, commentIDs, views, communityID } = req.body;
@@ -612,6 +715,7 @@ app.post('/comments/new', async (req, res) => {
         res.status(500).json({message: "Error saving new comment", error: error.message});
     }
 });
+
 // Update a previously posted comment
 app.put('/comments/edit/:commentID', async (req, res) => {
     const { content } = req.body;
@@ -724,6 +828,7 @@ app.delete('/comments/delete/:id', async (req, res) => {
         res.status(500).json({ message: "Error deleting comment." });
     }
 });
+
 // delete user
 app.delete('/users/:userID', async (req, res) => {
     try {
@@ -731,23 +836,71 @@ app.delete('/users/:userID', async (req, res) => {
         console.log(userID);
         const user = await User.findById(userID);
         const userDisplayName = user.displayName;
+
         // recursive function to delete a comment and its replies
         const deleteCommentAndReplies = async (commentID) => {
             const comment = await Comment.findById(commentID);
             if (!comment) return;
+
             // recursively delete each child comment
             for (const childCommentID of comment.commentIDs) {
                 await deleteCommentAndReplies(childCommentID);
             }
+
+            // remove the commentID from posts
+            const posts = await Post.find({ commentIDs: commentID });
+            for (const post of posts) {
+                // remove this commentID from the post's commentIDs array
+                post.commentIDs = post.commentIDs.filter(id => !id.equals(commentID));
+                await post.save();
+            }
+
+            // remove this commentID from the parent comments' commentIDs array
+            // find all comments that have this commentID in their `commentIDs` array (i.e., the parent comments)
+            const parentComments = await Comment.find({ commentIDs: commentID });
+            for (const parentComment of parentComments) {
+                parentComment.commentIDs = parentComment.commentIDs.filter(id => !id.equals(commentID));
+                await parentComment.save();
+            }
+
             // delete the current comment
             await Comment.findByIdAndDelete(commentID);
         };
-        // find all communities created by the user
-        const communities = await Community.find({ "members.0": userDisplayName });
-        // delete all posts and comments associated with the communities
-        for (const community of communities) {
+
+        // delete all comments and subcomments created by the user
+        const comments = await Comment.find({ commentedBy: userDisplayName });
+        for (const comment of comments) {
+            await deleteCommentAndReplies(comment._id);
+        }
+
+        // delete all posts created by the user and their associated comments/subcomments
+        const posts = await Post.find({ postedBy: userDisplayName });
+        for (const post of posts) {
+            if (post.commentIDs && post.commentIDs.length > 0) {
+                for (const commentID of post.commentIDs) {
+                    await deleteCommentAndReplies(commentID);
+                }
+            }
+            // delete the post itself
+            await Post.findByIdAndDelete(post._id);
+        }
+
+        // remove the user from communities they are a member of (but not the owner)
+        const communitiesAsMember = await Community.find({ members: userDisplayName, "members.0": { $ne: userDisplayName } });
+
+        for (const community of communitiesAsMember) {
+            // remove the user from the members array
+            const updatedMembers = community.members.filter(member => member !== userDisplayName);
+            await Community.updateOne({ _id: community._id }, { $set: { members: updatedMembers } });
+        }
+
+        // delete all posts, comments, and subcomments within communities created by the user (if user is the owner)
+        const communitiesAsOwner = await Community.find({ "members.0": userDisplayName });
+
+        for (const community of communitiesAsOwner) {
             const postIDs = community.postIDs;
-            // delete all comments related to the posts in this community
+
+            // delete all comments and subcomments related to posts in this community
             if (postIDs && postIDs.length > 0) {
                 for (const postID of postIDs) {
                     const post = await Post.findById(postID);
@@ -756,13 +909,15 @@ app.delete('/users/:userID', async (req, res) => {
                             await deleteCommentAndReplies(commentID);
                         }
                     }
+                    // delete the post itself
+                    await Post.findByIdAndDelete(postID);
                 }
             }
-            // delete all posts associated with the community
-            await Post.deleteMany({ _id: { $in: postIDs } });
+
             // delete the community itself
             await Community.findByIdAndDelete(community._id);
         }
+
         // delete the user
         await User.findByIdAndDelete(userID);
         res.status(200).json({ message: "User and all associated data deleted successfully." });
@@ -771,5 +926,7 @@ app.delete('/users/:userID', async (req, res) => {
         res.status(500).json({ message: "Error deleting user.", error: error.message });
     }
 });
+
+
 
 app.listen(port, () => {console.log("Server listening on port 8000...");});
