@@ -29,7 +29,7 @@
                     if (!isLoggedIn) {
                         // fetch posts matching the search query for non-logged-in users
                         const response = await axios.get(`http://localhost:8000/posts/search/${trimmedQuery}`);
-                        const sortedPosts = sortPostsByDate(response.data);
+                        sortPostsByDate(response.data);
                         
                         // now fetch comments that match the search query
                         const commentsResponse = await axios.get(`http://localhost:8000/comments/search/${trimmedQuery}`);

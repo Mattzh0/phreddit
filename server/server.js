@@ -36,8 +36,8 @@ app.use(session({
 const mongoDB = 'mongodb://127.0.0.1:27017/phreddit'; 
 mongoose.connect(mongoDB);
 
-app.get("/", function (req, res) {
-    res.send("Hello Phreddit!");
+app.get('/', (req, res) => {
+    res.status(200).send('Server is running');
 });
 
 app.post("/users/new", async (req, res) => {
@@ -926,7 +926,5 @@ app.delete('/users/:userID', async (req, res) => {
         res.status(500).json({ message: "Error deleting user.", error: error.message });
     }
 });
-
-
 
 app.listen(port, () => {console.log("Server listening on port 8000...");});
