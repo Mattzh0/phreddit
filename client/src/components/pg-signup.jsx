@@ -145,6 +145,7 @@ export default function SignUp( {displayPage }) {
               />
               <div className="welcome-button-container">
                 <button type="submit" className="register-button">Sign Up</button>
+                <button type="button" onClick={() => displayPage('welcome')}>Back</button>
               </div>
           </form>
       </div>

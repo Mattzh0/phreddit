@@ -30,7 +30,21 @@
                         // fetch posts matching the search query for non-logged-in users
                         const response = await axios.get(`http://localhost:8000/posts/search/${trimmedQuery}`);
                         const sortedPosts = sortPostsByDate(response.data);
-                        setPosts(sortedPosts);
+                        
+                        // now fetch comments that match the search query
+                        const commentsResponse = await axios.get(`http://localhost:8000/comments/search/${trimmedQuery}`);
+                        const commentPosts = commentsResponse.data.map(commentResult => ({
+                            ...commentResult.post,
+                            matchedCommentId: commentResult.comment._id,
+                            matchedCommentContent: commentResult.comment.content
+                        }));
+
+                        // combine posts and comment-related posts
+                        const combinedResults = [...response.data, ...commentPosts].filter((post, index, self) =>
+                            index === self.findIndex((p) => p._id === post._id)
+                        );
+
+                        setPosts(sortPostsByDate(combinedResults));
                     } else {
                         // fetch user's communities for logged-in users
                         const memberCommunitiesResponse = await axios.get(`http://localhost:8000/communities/user/${displayName}`);

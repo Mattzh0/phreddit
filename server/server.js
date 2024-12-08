@@ -855,6 +855,14 @@ app.delete('/users/:userID', async (req, res) => {
                 await post.save();
             }
 
+            // remove this commentID from the parent comments' commentIDs array
+            // find all comments that have this commentID in their `commentIDs` array (i.e., the parent comments)
+            const parentComments = await Comment.find({ commentIDs: commentID });
+            for (const parentComment of parentComments) {
+                parentComment.commentIDs = parentComment.commentIDs.filter(id => !id.equals(commentID));
+                await parentComment.save();
+            }
+
             // delete the current comment
             await Comment.findByIdAndDelete(commentID);
         };

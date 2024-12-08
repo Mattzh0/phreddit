@@ -124,7 +124,6 @@ a {
 /* CSS for the welcome page starts here */
 .welcome-container {
   width: 100%;
-  height: 70%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -133,6 +132,7 @@ a {
 
 .welcome {
   background-color: white;
+  height: 70%;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 40px;
@@ -508,6 +508,10 @@ a {
 }
 
 .comment-content {
+  margin-bottom: 10px;
+}
+
+.comment-upvotes {
   margin-bottom: 10px;
 }
 

@@ -18,10 +18,10 @@ export function getComments(post, comments) {
                 numComments += count(comment.commentIDs);
             }
         });
-  
+        
         return numComments;
     };
-  
+    
     return count(post.commentIDs);
 }
 
