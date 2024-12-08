@@ -7,9 +7,9 @@ To get started, navigate to the server and run "node init.js mongodb://127.0.0.1
 There are three unit tests. To run the client-based test, navigate to the client directory and run "npm test". To run the server-based tests, navigate to the server directory and run "npm test".
 
 ## Team Member 1 (Matthew) Contribution
-Use Cases: 1-6, 11-14, 18-19
-UML: Database
-Unit Testing: Tests 2-3
+- **Use Cases**: 1-6, 11-14, 18-19
+- **UML**: Database
+- **Unit Testing**: Tests 2-3
 
 ## Team Member 2 Contribution
 
