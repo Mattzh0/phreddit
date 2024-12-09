@@ -751,36 +751,41 @@ app.put('/posts/edit/:postID', async (req, res) => {
         res.status(500).json({ message: "Error updating post", error: error.message });
     }
 });
+
+const deletePost = async (postId) => {
+    // recursive function to delete a comment and its replies
+    const deleteCommentAndReplies = async (commentID) => {
+        const comment = await Comment.findById(commentID);
+        if (!comment) return; // skip if the comment doesn't exist
+        // recursively delete each child comment
+        for (const childCommentID of comment.commentIDs) {
+            await deleteCommentAndReplies(childCommentID);
+        }
+        // delete the current comment
+        await Comment.findByIdAndDelete(commentID);
+    };
+    // fetch the post to get its commentIDs
+    const post = await Post.findById(postId);
+    if (!post) {
+        throw new Error("Post not found");
+    }
+    // delete all comments associated with the post
+    if (post.commentIDs && post.commentIDs.length > 0) {
+        for (const commentID of post.commentIDs) {
+            // recursively delete each root comment and its replies
+            await deleteCommentAndReplies(commentID);
+        }
+    }
+    // delete the post itself
+    await Post.findByIdAndDelete(postId);
+    return { message: "Post and its associated comments have been deleted successfully." };
+}
 // delete a post along with its comments and replies
 app.delete('/posts/delete/:id', async (req, res) => {
     try {
         const postId = req.params.id;
-        // recursive function to delete a comment and its replies
-        const deleteCommentAndReplies = async (commentID) => {
-            const comment = await Comment.findById(commentID);
-            if (!comment) return; // skip if the comment doesn't exist
-            // recursively delete each child comment
-            for (const childCommentID of comment.commentIDs) {
-                await deleteCommentAndReplies(childCommentID);
-            }
-            // delete the current comment
-            await Comment.findByIdAndDelete(commentID);
-        };
-        // fetch the post to get its commentIDs
-        const post = await Post.findById(postId);
-        if (!post) {
-            return res.status(404).json({ message: "Post not found." });
-        }
-        // delete all comments associated with the post
-        if (post.commentIDs && post.commentIDs.length > 0) {
-            for (const commentID of post.commentIDs) {
-                // recursively delete each root comment and its replies
-                await deleteCommentAndReplies(commentID);
-            }
-        }
-        // delete the post itself
-        await Post.findByIdAndDelete(postId);
-        res.status(200).json({ message: "Post and its associated comments have been deleted successfully." });
+        const response = await deletePost(postId);
+        res.status(200).json(response);
     } catch (error) {
         console.error("Error deleting post:", error);
         res.status(500).json({ message: "Error deleting post.", error: error.message });
@@ -927,4 +932,7 @@ app.delete('/users/:userID', async (req, res) => {
     }
 });
 
+module.exports = { deletePost };
+
 app.listen(port, () => {console.log("Server listening on port 8000...");});
+
