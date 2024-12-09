@@ -28,7 +28,7 @@ export default function Navbar({displayPage, curPage, curCommunityID, setCurComm
           }
       };
       fetchCommunities();
-    }, [curCommunityID, displayName]);
+    }, [curCommunityID, displayName, curPage]);
 
     const handleCommunityClick = (communityID) => {
       setCurCommunityID(communityID);
@@ -41,7 +41,7 @@ export default function Navbar({displayPage, curPage, curCommunityID, setCurComm
           setCurCommunityID(null);
           displayPage('home');
         }}>
-          <a href="#" className="navbar-home-text">Home</a>
+          <a href="/#" className="navbar-home-text">Home</a>
         </div>
         <div className="navbar-delimiter"></div>
         <div className="navbar-communities">
@@ -55,7 +55,7 @@ export default function Navbar({displayPage, curPage, curCommunityID, setCurComm
              {communities.map(community => 
                 <a
                   key={community._id}
-                  href="#" 
+                  href="/#" 
                   onClick={() => {
                     handleCommunityClick(community._id);
                   }}

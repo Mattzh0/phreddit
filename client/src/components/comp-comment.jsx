@@ -4,7 +4,7 @@ import axios from 'axios';
 
 export default function Comment({ displayPage, commentID, level, post, isLoggedIn, displayName }) {
     const [comment, setComment] = useState(null);
-    const [commentUpvotes, setCommentUpvotes] = useState(null);
+    const [commentUpvotes, setCommentUpvotes] = useState(0);
 
     useEffect(() => {
         const fetchComment = async () => {
@@ -21,7 +21,7 @@ export default function Comment({ displayPage, commentID, level, post, isLoggedI
     }, [commentID]);
 
     if (!comment) {
-        return <div>Loading...</div>;
+        return null;
     }
 
     const replies = comment.commentIDs.map((replyID) => {
@@ -55,9 +55,9 @@ export default function Comment({ displayPage, commentID, level, post, isLoggedI
         <div className="comment" style={{marginLeft: `${level * 15}px`}}>
             <div className="comment-details">{comment.commentedBy} • {getTimeStamp(new Date(comment.commentedDate))}</div>
             <div className="comment-content">{comment.content}</div>
+            <div className="comment-upvotes">Upvotes: {commentUpvotes}</div>
             {isLoggedIn && 
               <div className="comment-vote-buttons">
-                <div>Upvotes: {commentUpvotes}</div>
                 <button onClick={() => updateVotes('upvote')}>Upvote</button>
                 <button onClick={() => updateVotes('downvote')}>Downvote</button>
               </div>

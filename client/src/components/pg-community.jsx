@@ -1,6 +1,6 @@
 import { getTimeStamp } from './function-time.jsx';
 import { useState, useEffect } from 'react';
-//import Sortbutton from './comp-sortbutton.jsx'
+import Sortbutton from './comp-sortbutton.jsx'
 import axios from 'axios';
 import Post from './comp-post.jsx';
 
@@ -12,6 +12,7 @@ export default function Communitypage({ displayPage, communityID, isLoggedIn, di
     const [communityPosts, setCommunityPosts] = useState([]);
     const [community, setCommunity] = useState(null);
     const [isMember, setIsMember] = useState(false);
+    const [memberCount, setMemberCount] = useState(0);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -31,17 +32,27 @@ export default function Communitypage({ displayPage, communityID, isLoggedIn, di
                                 console.error("Error fetching post:", error);
                             }
                         })
-                    )
+                    );
+    
+                    // Filter out invalid posts (posts that are null or don't have postedDate)
+                    posts = posts.filter(post => post && post.postedDate);
+    
+                    // Sort posts by postedDate (newest first)
                     posts = posts.sort((post1, post2) => {
                         const date1 = new Date(post1.postedDate);
                         const date2 = new Date(post2.postedDate);
                         return date2 - date1;
                     });
+    
                     setCommunityPosts(posts);
                 }
-
+    
+                setMemberCount(communityObject.members.length);
                 if (communityObject && communityObject.members.includes(displayName)) {
                     setIsMember(true);
+                }
+                else {
+                    setIsMember(false);
                 }
             }
             catch(error) {
@@ -49,11 +60,12 @@ export default function Communitypage({ displayPage, communityID, isLoggedIn, di
             }
         }
         fetchData();
-    }, [communityID, isLoggedIn, displayName]);
+    }, [displayPage, communityID, isLoggedIn, displayName, isMember]);
     
     if (!community) {
         return <div>Loading...</div>;
     }
+
 
     return(
         <section className="main-container">
@@ -62,17 +74,16 @@ export default function Communitypage({ displayPage, communityID, isLoggedIn, di
                 <p className="communitypage-header-text">
                     r/{community.name}
                 </p>
-                <div className="communitypage-buttons">{
-                    /*
+                <div className="communitypage-buttons">
                     <Sortbutton order="Newest" posts={communityPosts} setPosts={setCommunityPosts}/>
                     <Sortbutton order="Oldest" posts={communityPosts} setPosts={setCommunityPosts}/>
-                    <Sortbutton order="Active" posts={communityPosts} setPosts={setCommunityPosts}/>*/}
+                    <Sortbutton order="Active" posts={communityPosts} setPosts={setCommunityPosts}/>
                 </div>
                 </div>
                 <div className="community-info">
                     <div className="community-description">{community.description}</div>
                     <div className="community-creation-time">Created {getTimeStamp(new Date(community.startDate))} • By {community.members[0]}</div>
-                    <div className="community-post-count-member-count">{community.postIDs.length} Posts • {community.members.length} Members</div>
+                    <div className="community-post-count-member-count">{community.postIDs.length} Posts • {memberCount} Members</div>
                 </div>
                 {isLoggedIn && !isMember && 
                 <div className="join-leave-parent">
@@ -85,6 +96,7 @@ export default function Communitypage({ displayPage, communityID, isLoggedIn, di
 
                             if (response.status === 200) {
                                 setIsMember(true);
+                                setMemberCount(memberCount + 1);
                             }
                         }
                         catch(error) {
@@ -106,6 +118,7 @@ export default function Communitypage({ displayPage, communityID, isLoggedIn, di
 
                             if (response.status === 200) {
                                 setIsMember(false);
+                                setMemberCount(memberCount - 1);
                             }
                         }
                         catch(error) {

@@ -68,8 +68,7 @@ export default function SignUp( {displayPage }) {
     }
     
     try {
-      console.log(newUser);
-      const response = await axios.post('http://localhost:8000/users/new', newUser, {withCredentials: true});
+      await axios.post('http://localhost:8000/users/new', newUser, {withCredentials: true});
       displayPage('welcome');
 
       // clear the registration form after registering
@@ -146,6 +145,7 @@ export default function SignUp( {displayPage }) {
               />
               <div className="welcome-button-container">
                 <button type="submit" className="register-button">Sign Up</button>
+                <button type="button" onClick={() => displayPage('welcome')}>Back</button>
               </div>
           </form>
       </div>

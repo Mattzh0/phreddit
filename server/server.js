@@ -36,8 +36,8 @@ app.use(session({
 const mongoDB = 'mongodb://127.0.0.1:27017/phreddit'; 
 mongoose.connect(mongoDB);
 
-app.get("/", function (req, res) {
-    res.send("Hello Phreddit!");
+app.get('/', (req, res) => {
+    res.status(200).send('Server is running');
 });
 
 app.post("/users/new", async (req, res) => {
@@ -96,7 +96,6 @@ app.post('/users/login', async (req, res) => {
 
         // if credentials are correct, store user info in the session
         req.session.userId = user._id;
-        console.log(user.displayName);
         req.session.displayName = user.displayName;
 
         res.status(200).json({ message: "Login successful" });
@@ -129,7 +128,6 @@ app.get('/users/loggedIn', (req, res) => {
 app.get('/users/:displayName', async (req, res) => {
     try {
         const { displayName } = req.params;
-        console.log(displayName);
         const user = await User.findOne({ displayName: displayName });
 
         res.status(200).send(user);
@@ -137,6 +135,16 @@ app.get('/users/:displayName', async (req, res) => {
         console.error('Error fetching user:', error);
     }
 });
+
+app.get('/users', async (req, res) => {
+    try {
+        const users = await User.find();
+        res.status(200).json(users);
+    }
+    catch (error) {
+        console.error('Error fetching all users:', error);
+    }
+})
 
 // fetches and returns all communities in the database
 app.get("/communities", async (req, res) => {
@@ -160,6 +168,18 @@ app.get('/communities/user/:displayName', async (req, res) => {
     }
 });
 
+// fetches and returns all communities that a given user created
+app.get('/communities/user/createdBy/:displayName', async (req, res) => {
+    try {
+        const name = req.params.displayName
+        const communities = await Community.find({"members.0": name})
+        res.status(200).json(communities);
+    }
+    catch {
+        res.status(500).json({ message: "Error fetching the user's communities", error: error.message });
+    }
+});
+
 // fetches and returns a specific community
 app.get("/communities/:communityID", async (req, res) => {
     try {
@@ -169,6 +189,68 @@ app.get("/communities/:communityID", async (req, res) => {
     }
     catch (error) {
         res.status(500).json({ message: "Error fetching community", error: error.message });
+    }
+});
+
+// edits an existing community
+app.put('/communities/edit/:communityID', async (req, res) => {
+    const { name, description } = req.body;
+    const communityID = req.params.communityID;
+    try {
+        const updatedCommunity = await Community.findByIdAndUpdate(
+            communityID,
+            { name, description },
+            { new: true }
+        );
+        res.status(200).json(updatedCommunity);
+    }
+    catch (error) {
+        res.status(500).json({ message: "Error editing community", error: error.message });
+    }
+});
+// deletes a community along with its posts and comments
+app.delete('/communities/:communityID', async (req, res) => {
+    try {
+        const { communityID } = req.params;
+        // recursive function to delete a comment and its replies
+        const deleteCommentAndReplies = async (commentID) => {
+            // 
+            const comment = await Comment.findById(commentID);
+            if (!comment) return; // skip if the comment doesn't exist
+            // recursively delete each child comment
+            for (const childCommentID of comment.commentIDs) {
+                await deleteCommentAndReplies(childCommentID);
+            }
+            // delete the current comment
+            await Comment.findByIdAndDelete(commentID);
+        };
+        // fetch the community to get its related posts
+        const community = await Community.findById(communityID);
+        if (!community) {
+            return res.status(404).json({ message: "Community not found." });
+        }
+        const postIDs = community.postIDs;
+        // delete all comments associated with the posts in the community
+        if (postIDs && postIDs.length > 0) {
+            for (const postID of postIDs) {
+                // fetch the post to access its commentIDs
+                const post = await Post.findById(postID);
+                if (post && post.commentIDs.length > 0) {
+                    // recursively delete each root comment
+                    for (const commentID of post.commentIDs) {
+                        await deleteCommentAndReplies(commentID);
+                    }
+                }
+            }
+        }
+        // delete all posts associated with the community
+        await Post.deleteMany({ _id: { $in: postIDs } });
+        // delete the community itself
+        await Community.findByIdAndDelete(communityID);
+        res.status(200).json({ message: "Community and all associated data deleted successfully." });
+    } catch (error) {
+        console.error("Error deleting community:", error);
+        res.status(500).json({ message: "Error deleting community.", error: error.message });
     }
 });
 
@@ -367,7 +449,7 @@ app.get('/posts/comment/:commentID', async (req, res) => {
         const postWithComment = await Post.findOne({commentIDs: commentID})
         res.status(200).json(postWithComment);
     }
-    catch {
+    catch (error) {
         res.status(500).json({ message: "Error fetching posts with the specificed comment", error: error.message });
     }
 })
@@ -411,7 +493,7 @@ app.get('/comments/:commentID', async (req, res) => {
         const comment = await Comment.findById(req.params.commentID);
         res.status(200).json(comment);
     }
-    catch {
+    catch (error) {
         res.status(500).json({ message: "Error fetching comment", error: error.message });
     }
 })
@@ -447,34 +529,125 @@ app.post("/comments/:commentID/votes", async (req, res) => {
     }
 });
 
-// fetches and returns all comments that have the search query
+// fetches and returns all comments that have the search query, including nested ones
 app.get('/comments/search/:searchQuery', async (req, res) => {
     try {
         const searchQuery = req.params.searchQuery;
-        const terms = searchQuery.split(' ')
-        
+        const terms = searchQuery.split(' ');
         const regexArray = terms.map(term => new RegExp(`\\b${term}\\b`, 'i'));
+        
+        // find all comments that match the search query
+        const searchedComments = await Comment.find({
+            content: { $in: regexArray }
+        });
 
-        const searchedComments = await Comment.find({ content: { $in: regexArray } });
+        // function to find the root post for a comment
+        async function findRootPost(commentId) {
+            // first check if this comment is directly under a post
+            const directPost = await Post.findOne({ commentIDs: commentId });
+            if (directPost) {
+                return directPost;
+            }
 
-        res.status(200).json(searchedComments);
+            // if not found, this comment is nested. Search for its parent comment
+            let currentCommentId = commentId;
+            while (true) {
+                // find a comment that has this comment in its commentIDs
+                const parentComment = await Comment.findOne({ commentIDs: currentCommentId });
+                
+                if (!parentComment) {
+                    return null; // no parent found
+                }
+
+                // check if this parent comment is directly under a post
+                const parentPost = await Post.findOne({ commentIDs: parentComment._id });
+                if (parentPost) {
+                    return parentPost;
+                }
+
+                // if not found, continue up the chain
+                currentCommentId = parentComment._id;
+            }
+        }
+
+        // for each matching comment, find its root post
+        const results = await Promise.all(
+            searchedComments.map(async (comment) => {
+                const rootPost = await findRootPost(comment._id);
+                return {
+                    comment,
+                    post: rootPost,
+                    isNestedComment: true
+                };
+            })
+        );
+
+        // filter out any results where we couldn't find the root post
+        const validResults = results.filter(result => result.post !== null);
+        
+        res.status(200).json(validResults);
+    } catch (error) {
+        console.error('Error in comment search:', error);
+        res.status(500).json({ 
+            message: "Error fetching searched comments", 
+            error: error.message 
+        });
     }
-    catch {
-        res.status(500).json({ message: "Error fetching searched comments", error: error.message });
-    }
-})
+});
 
-// fetches and returns the parent comment of a specific comment
+// fetches and returns the parent comment of a specific comment (and its nested comments)
 app.get('/comments/parent/:commentID', async (req, res) => {
     try {
         const commentID = req.params.commentID;
-        const parentComment = await Comment.find({commentIDs: commentID})
-        res.status(200).json(parentComment);
-    }
-    catch {
+        
+        // find the comment and all its nested replies
+        const findAllReplies = async (commentID) => {
+            const comment = await Comment.findById(commentID);
+            let allReplies = [comment];
+
+            // recursively find all replies for the given comment
+            for (let childID of comment.commentIDs) {
+                allReplies.push(...await findAllReplies(childID));
+            }
+
+            return allReplies;
+        };
+
+        const allReplies = await findAllReplies(commentID);
+        
+        res.status(200).json(allReplies);
+    } catch (error) {
         res.status(500).json({ message: "Error fetching the parent comment of the specified comment", error: error.message });
     }
-})
+});
+
+app.get('/comments/parentOnly/:commentID', async (req, res) => {
+    try {
+        const commentID = req.params.commentID;
+
+        // find the comment by ID
+        const comment = await Comment.findById(commentID);
+
+        // if no comment is found, return an error
+        if (!comment) {
+            return res.status(404).json({ message: "Comment not found" });
+        }
+
+        // find the parent comment by searching through all comments
+        const allComments = await Comment.find();
+        const parentComment = allComments.find(c => c.commentIDs.includes(commentID));
+
+        // if a parent is found, return it, otherwise return an error
+        if (parentComment) {
+            return res.status(200).json(parentComment);
+        } else {
+            return res.status(404).json({ message: "This comment is not a reply and has no parent." });
+        }
+
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching the parent comment", error: error.message });
+    }
+});
 
 app.post('/posts/new', async (req, res) => {
     const { title, content, linkFlairID, postedBy, postedDate, commentIDs, views, communityID } = req.body;
@@ -488,19 +661,16 @@ app.post('/posts/new', async (req, res) => {
             commentIDs,
             views
         })
-
         const savedPost = await newPost.save();
         const community = await Community.findById(communityID);
         community.postIDs.push(savedPost._id);
         await community.save();
-
         res.status(201).json(savedPost);
     }
     catch (error) {
         res.status(500).json({message: "Error saving new post", error: error.message});
     }
 });
-
 app.post('/linkflairs/new', async (req, res) => {
     const { content } = req.body;
     try {
@@ -514,20 +684,16 @@ app.post('/linkflairs/new', async (req, res) => {
         res.status(500).json({message: "Error saving new new link flair", error: error.message});
     }
 });
-
 app.post('/comments/new', async (req, res) => {
     const { content, commentIDs, commentedBy, commentedDate, postID, replyingToID } = req.body;
     try {
-
         const newComment = new Comment({
             content,
             commentIDs,
             commentedBy,
             commentedDate
         });
-
         const savedComment = await newComment.save();
-
         if (replyingToID) {
             const replyingTo = await Comment.findById(replyingToID);
             replyingTo.commentIDs.push(savedComment._id);
@@ -543,7 +709,6 @@ app.post('/comments/new', async (req, res) => {
                 console.error("Error creating comment", error);
             }
         }
-
         res.status(201).json(savedComment);
     }
     catch(error) {
@@ -555,37 +720,35 @@ app.post('/comments/new', async (req, res) => {
 app.put('/comments/edit/:commentID', async (req, res) => {
     const { content } = req.body;
     const commentID = req.params.commentID;
-
     try {
         const updatedComment = await Comment.findByIdAndUpdate(
             commentID,
             { content },
             { new: true }
         );
-
         res.status(201).json(updatedComment);
     }
     catch (error) {
         res.status(500).json({message: "Error updating comment", error: error.message});
     }
 })
-
 // Update a previously posted post
-app.put('/posts/edit/:postID', async (req, res) => {
-    const { title, content, linkFlairID, postedBy, postedDate, commentIDs, communityID } = req.body;
+app.put('/posts/edit/:postID', async (req, res) => { 
+    const { title, content, linkFlairID } = req.body;
     const postID = req.params.postID;
-
     try {
         const updatedPost = await Post.findByIdAndUpdate(
             postID,
-            { title, content, linkFlairID, postedBy, postedDate, commentIDs },
+            { title, content, linkFlairID },
             { new: true }
         );
-
-        res.status(201).json(updatedPost);
+        if (!updatedPost) {
+            return res.status(404).json({ message: "Post not found" });
+        }
+        res.status(200).json(updatedPost);
     }
     catch (error) {
-        res.status(500).json({message: "Error updating post", error: error.message});
+        res.status(500).json({ message: "Error updating post", error: error.message });
     }
 });
 // delete a post along with its comments and replies

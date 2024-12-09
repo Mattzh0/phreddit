@@ -3,22 +3,26 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 export function getComments(post, comments) {
-  if (!post.commentIDs) {
-      return 0;
-  }
+    if (!post.commentIDs || post.commentIDs.length === 0) {
+        return 0;
+    }
 
-  const count = (commentIDs) => {
-      let numComments = commentIDs.length;
-
-      commentIDs.forEach((commentID) => {
-          const comment = comments.find((comment => comment._id === commentID));
-          if (comment.commentIDs.length > 0) {
-              numComments += count(comment.commentIDs);
-          }
-      });
-      return numComments
-  }
-  return count(post.commentIDs);
+    const count = (commentIDs) => {
+        let numComments = commentIDs.length;
+  
+        commentIDs.forEach((commentID) => {
+            const comment = comments.find((comment) => comment._id === commentID);
+            
+            // check if comment is undefined or does not have commentIDs
+            if (comment && comment.commentIDs && comment.commentIDs.length > 0) {
+                numComments += count(comment.commentIDs);
+            }
+        });
+        
+        return numComments;
+    };
+    
+    return count(post.commentIDs);
 }
 
 export default function Post({ post, displayPage, showCommunity=true }) {
@@ -79,7 +83,7 @@ export default function Post({ post, displayPage, showCommunity=true }) {
   const flairHTML = flair ? <div className="homepage-post-flair">{flair.content}</div> : null;
 
   return (
-      <a href="#" className="homepage-post-link" onClick={() => {
+      <a href="/#" className="homepage-post-link" onClick={() => {
           incrementViewCount();
           return displayPage('post', null, post);
       }}>

@@ -14,7 +14,7 @@ export default function Banner({ setSearchQuery, displayPage, curPage, setCurCom
 
     return(
         <div className="banner"> 
-            <a href="#" className="application-name" onClick={() => {
+            <a href="/#" className="application-name" onClick={() => {
                 setCurCommunityID(null);
                 displayPage('welcome');
             }}>phreddit</a>
@@ -43,7 +43,7 @@ export default function Banner({ setSearchQuery, displayPage, curPage, setCurCom
                 )}
                 {isLoggedIn && <button id="profile-button-user" onClick={() => {
                     setCurCommunityID(null);
-                    displayPage('userprofile');
+                    displayPage('userprofile', displayName);
                 }}>{displayName}</button>}
             </div>
         </div>
