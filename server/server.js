@@ -587,6 +587,181 @@ app.put('/posts/edit/:postID', async (req, res) => {
     catch (error) {
         res.status(500).json({message: "Error updating post", error: error.message});
     }
-})
+});
+// delete a post along with its comments and replies
+app.delete('/posts/delete/:id', async (req, res) => {
+    try {
+        const postId = req.params.id;
+        // recursive function to delete a comment and its replies
+        const deleteCommentAndReplies = async (commentID) => {
+            const comment = await Comment.findById(commentID);
+            if (!comment) return; // skip if the comment doesn't exist
+            // recursively delete each child comment
+            for (const childCommentID of comment.commentIDs) {
+                await deleteCommentAndReplies(childCommentID);
+            }
+            // delete the current comment
+            await Comment.findByIdAndDelete(commentID);
+        };
+        // fetch the post to get its commentIDs
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ message: "Post not found." });
+        }
+        // delete all comments associated with the post
+        if (post.commentIDs && post.commentIDs.length > 0) {
+            for (const commentID of post.commentIDs) {
+                // recursively delete each root comment and its replies
+                await deleteCommentAndReplies(commentID);
+            }
+        }
+        // delete the post itself
+        await Post.findByIdAndDelete(postId);
+        res.status(200).json({ message: "Post and its associated comments have been deleted successfully." });
+    } catch (error) {
+        console.error("Error deleting post:", error);
+        res.status(500).json({ message: "Error deleting post.", error: error.message });
+    }
+});
+// delete a comment and its replies
+app.delete('/comments/delete/:id', async (req, res) => {
+    try {
+        const commentID = req.params.id;
+        const deleteCommentAndReplies = async (commentID) => {
+            const comment = await Comment.findById(commentID);
+            if (!comment) return; // skip if the comment doesn't exist
+            // recursively delete replies
+            for (const replyID of comment.commentIDs) {
+                await deleteCommentAndReplies(replyID);
+            }
+            // delete the current comment
+            await Comment.findByIdAndDelete(commentID);
+        };
+        
+        // delete the comment and all its replies
+        const comment = await Comment.findById(commentID);
+        await deleteCommentAndReplies(commentID);
+        // check if the comment is a top-level comment (directly attached to the post)
+        const post = await Post.findOne({ commentIDs: commentID });
+        if (post) {
+            // if the post is found, update its commentIDs to remove the deleted top-level comment
+            await Post.updateOne(
+                { _id: post._id },
+                { $pull: { commentIDs: commentID } }
+            );
+        } 
+        else {
+            // if the comment is a reply, remove it from the parent comment's commentIDs
+            const parentComment = await Comment.findOne({ commentIDs: commentID });
+            // remove the deleted comment from the parent comment's commentIDs
+            await Comment.updateOne(
+                { _id: parentComment._id },
+                { $pull: { commentIDs: commentID } }
+            );
+        }
+        res.status(200).json({ message: "Comment and replies deleted successfully." });
+    } catch (error) {
+        console.error("Error deleting comment:", error);
+        res.status(500).json({ message: "Error deleting comment." });
+    }
+});
+
+// delete user
+app.delete('/users/:userID', async (req, res) => {
+    try {
+        const { userID } = req.params;
+        console.log(userID);
+        const user = await User.findById(userID);
+        const userDisplayName = user.displayName;
+
+        // recursive function to delete a comment and its replies
+        const deleteCommentAndReplies = async (commentID) => {
+            const comment = await Comment.findById(commentID);
+            if (!comment) return;
+
+            // recursively delete each child comment
+            for (const childCommentID of comment.commentIDs) {
+                await deleteCommentAndReplies(childCommentID);
+            }
+
+            // remove the commentID from posts
+            const posts = await Post.find({ commentIDs: commentID });
+            for (const post of posts) {
+                // remove this commentID from the post's commentIDs array
+                post.commentIDs = post.commentIDs.filter(id => !id.equals(commentID));
+                await post.save();
+            }
+
+            // remove this commentID from the parent comments' commentIDs array
+            // find all comments that have this commentID in their `commentIDs` array (i.e., the parent comments)
+            const parentComments = await Comment.find({ commentIDs: commentID });
+            for (const parentComment of parentComments) {
+                parentComment.commentIDs = parentComment.commentIDs.filter(id => !id.equals(commentID));
+                await parentComment.save();
+            }
+
+            // delete the current comment
+            await Comment.findByIdAndDelete(commentID);
+        };
+
+        // delete all comments and subcomments created by the user
+        const comments = await Comment.find({ commentedBy: userDisplayName });
+        for (const comment of comments) {
+            await deleteCommentAndReplies(comment._id);
+        }
+
+        // delete all posts created by the user and their associated comments/subcomments
+        const posts = await Post.find({ postedBy: userDisplayName });
+        for (const post of posts) {
+            if (post.commentIDs && post.commentIDs.length > 0) {
+                for (const commentID of post.commentIDs) {
+                    await deleteCommentAndReplies(commentID);
+                }
+            }
+            // delete the post itself
+            await Post.findByIdAndDelete(post._id);
+        }
+
+        // remove the user from communities they are a member of (but not the owner)
+        const communitiesAsMember = await Community.find({ members: userDisplayName, "members.0": { $ne: userDisplayName } });
+
+        for (const community of communitiesAsMember) {
+            // remove the user from the members array
+            const updatedMembers = community.members.filter(member => member !== userDisplayName);
+            await Community.updateOne({ _id: community._id }, { $set: { members: updatedMembers } });
+        }
+
+        // delete all posts, comments, and subcomments within communities created by the user (if user is the owner)
+        const communitiesAsOwner = await Community.find({ "members.0": userDisplayName });
+
+        for (const community of communitiesAsOwner) {
+            const postIDs = community.postIDs;
+
+            // delete all comments and subcomments related to posts in this community
+            if (postIDs && postIDs.length > 0) {
+                for (const postID of postIDs) {
+                    const post = await Post.findById(postID);
+                    if (post && post.commentIDs.length > 0) {
+                        for (const commentID of post.commentIDs) {
+                            await deleteCommentAndReplies(commentID);
+                        }
+                    }
+                    // delete the post itself
+                    await Post.findByIdAndDelete(postID);
+                }
+            }
+
+            // delete the community itself
+            await Community.findByIdAndDelete(community._id);
+        }
+
+        // delete the user
+        await User.findByIdAndDelete(userID);
+        res.status(200).json({ message: "User and all associated data deleted successfully." });
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        res.status(500).json({ message: "Error deleting user.", error: error.message });
+    }
+});
 
 app.listen(port, () => {console.log("Server listening on port 8000...");});
