@@ -11,5 +11,8 @@ There are three unit tests. To run the client-based test, navigate to the client
 - **UML**: Database
 - **Unit Testing**: Tests 2-3
 
-## Team Member 2 Contribution
+## Team Member 2 (Eric) Contribution
+- **Use Cases**: 7-10, 15-17, 18
+- **UML**: Component Hierarchy, Server
+- **Unit Testing**: Tests 1
 
