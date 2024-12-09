@@ -5,8 +5,8 @@ const { deletePost } = require('./server.js')
 
 let db;
 
-beforeAll(() => {
-    mongoose.connect('mongodb://127.0.0.1:27017/phreddit');
+beforeAll(async () => {
+    await mongoose.connect('mongodb://127.0.0.1:27017/phreddit');
     db = mongoose.connection;
 });
 
@@ -53,10 +53,11 @@ test('post deletion removes post and comments from database', async () => {
         linkFlairID: null,
         postedBy: 'TestUser',
         postedDate: new Date(),
-        commentIDs: [comment1._id, comment3._id],
+        commentIDs: [comment2._id, comment3._id],
         views: 0,
         upvotes: 0
     });
+    await post.save()
 
     // Add all IDs to the list
     idList.push(post._id);
